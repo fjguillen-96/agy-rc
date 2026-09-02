@@ -1,0 +1,34 @@
+# ==============================================================================
+# agy-rc — Unidad de servicio systemd a nivel de usuario
+#
+# Ubicación de instalación: ~/.config/systemd/user/agy-rc.service
+#
+# NOTA: Si el repositorio se encuentra en una ruta distinta a %h/projects/agy-rc,
+# el script scripts/install.sh sustituirá automáticamente las rutas usando sed.
+# ==============================================================================
+
+[Unit]
+Description=agy-rc — PWA remota para Antigravity CLI
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/projects/agy-rc
+ExecStart=%h/projects/agy-rc/scripts/start.sh
+Restart=always
+RestartSec=2
+
+# KillMode=process es crítico: asegura que al reiniciar o detener el servicio
+# de Node.js únicamente se termine el proceso principal de Node, protegiendo
+# el servidor tmux (-L agyrc) y manteniendo vivas las sesiones activas de agy.
+KillMode=process
+
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=NODE_ENV=production
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=agy-rc
+
+[Install]
+WantedBy=default.target

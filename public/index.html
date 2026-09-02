@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=overlays-content">
+<meta name="theme-color" content="#0b0f19">
+<title>Antigravity RC</title>
+<meta name="description" content="Chatea de forma remota con Antigravity vía Tailscale.">
+
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/icons/favicon-64.png" sizes="64x64" type="image/png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="agy-rc">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="color-scheme" content="dark">
+
+<link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- Vista única: chat -->
+  <section class="view" id="view-chat">
+    <header class="topbar" id="chat-topbar"></header>
+    <div class="chat-wrap" id="chat-wrap">
+      <div class="chat-empty" id="chat-empty" hidden>
+        <p>No hay ningún chat abierto.</p>
+        <button type="button" class="btn btn--primary" id="chat-empty-new-btn">＋ Nuevo chat</button>
+      </div>
+      <div class="chat-messages" id="chat-messages"></div>
+    </div>
+    <div class="dock" id="chat-dock">
+      <div class="ccomposer" id="chat-composer"></div>
+    </div>
+  </section>
+
+</div>
+
+<div class="backdrop" id="drawer-backdrop"></div>
+<aside class="drawer" id="drawer" aria-hidden="true"></aside>
+
+<div class="sheet-backdrop" id="sheet-backdrop"></div>
+<section class="sheet" id="sheet" aria-hidden="true"></section>
+
+<div class="sheet-backdrop" id="new-chat-backdrop"></div>
+<section class="sheet sheet--tall" id="new-chat-sheet" aria-hidden="true"></section>
+
+<div class="toast-stack" id="toast-stack"></div>
+
+<div id="token-dialog-root"></div>
+<div id="insecure-banner-root"></div>
+
+<script src="/vendor/marked/marked.umd.js"></script>
+<script src="/vendor/dompurify/purify.min.js"></script>
+<script type="module" src="/js/main.js"></script>
+</body>
+</html>

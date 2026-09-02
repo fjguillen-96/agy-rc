@@ -1,0 +1,38 @@
+{
+  "name": "agy-rc",
+  "version": "0.1.0",
+  "description": "Self-hosted mobile PWA remote control for Google Antigravity CLI (agy) over Tailscale, resilient tmux orchestration, and live Gemini 3.5 voice transcription",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fjguillen-96/agy-rc.git"
+  },
+  "keywords": [
+    "antigravity",
+    "gemini",
+    "claude-code",
+    "pwa",
+    "mobile",
+    "remote-control",
+    "tmux",
+    "tailscale",
+    "ai-agent",
+    "developer-tools"
+  ],
+  "engines": {
+    "node": ">=20.6"
+  },
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server/index.js",
+    "dev": "node --watch --env-file-if-exists=.env server/index.js",
+    "test": "node --test \"test/**/*.test.js\""
+  },
+  "license": "MIT",
+  "dependencies": {
+    "dompurify": "^3.4.14",
+    "express": "^5.2.1",
+    "marked": "^15.0.12",
+    "ws": "^8.21.3"
+  }
+}

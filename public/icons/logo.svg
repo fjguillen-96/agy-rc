@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0f19" />
+      <stop offset="50%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+
+    <!-- Glyph Primary Gradient: Electric Cyan -> Royal Indigo -> Vivid Violet -->
+    <linearGradient id="glyphGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="45%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#a855f7" />
+    </linearGradient>
+
+    <!-- Accent Ring Gradient: Cyan to Hot Pink -->
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.9" />
+      <stop offset="50%" stop-color="#8b5cf6" stop-opacity="0.7" />
+      <stop offset="100%" stop-color="#f43f5e" stop-opacity="0.9" />
+    </linearGradient>
+
+    <!-- Core Floating Gem Gradient -->
+    <linearGradient id="gemGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#67e8f9" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+
+    <!-- Ambient Radial Glow behind the floating mark -->
+    <radialGradient id="ambientGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.35" />
+      <stop offset="60%" stop-color="#38bdf8" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Shadow for Levitation effect -->
+    <radialGradient id="levitateShadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00f2fe" stop-opacity="0.4" />
+      <stop offset="40%" stop-color="#6366f1" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Glow Filter -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Base Squircle Background (iOS/PWA standard) -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+
+  <!-- Subtle border highlight -->
+  <rect width="508" height="508" x="2" y="2" rx="110" fill="none" stroke="#334155" stroke-width="2" stroke-opacity="0.5" />
+
+  <!-- Ambient Glow -->
+  <circle cx="256" cy="256" r="190" fill="url(#ambientGlow)" />
+
+  <!-- Levitation Base Shadow -->
+  <ellipse cx="256" cy="388" rx="110" ry="24" fill="url(#levitateShadow)" />
+
+  <!-- Orbital Gravity / Remote Pulse Rings (Back arc) -->
+  <path d="M 120 286 C 120 240, 392 240, 392 286" 
+        fill="none" stroke="url(#ringGrad)" stroke-width="6" stroke-linecap="round" stroke-dasharray="14 10" opacity="0.4" />
+
+  <!-- Levitating "A" Spire Glyph (Antigravity Chevron) -->
+  <g filter="url(#softGlow)">
+    <!-- Main Upward Arrowhead / Levitating Wings -->
+    <path d="M 256 108
+             L 374 336
+             C 382 352, 368 368, 350 368
+             L 312 368
+             C 300 368, 290 360, 285 348
+             L 256 280
+             L 227 348
+             C 222 360, 212 368, 200 368
+             L 162 368
+             C 144 368, 130 352, 138 336
+             Z"
+          fill="url(#glyphGrad)" />
+
+    <!-- Inner Floating Energy Core (Levitating Diamond/Pulse) -->
+    <polygon points="256,182 284,234 256,262 228,234" fill="url(#gemGrad)" />
+
+    <!-- High-tech Top Beacon Dot -->
+    <circle cx="256" cy="144" r="8" fill="#ffffff" opacity="0.95" />
+  </g>
+
+  <!-- Orbital Gravity / Remote Pulse Rings (Front arc) -->
+  <path d="M 120 286 C 120 332, 392 332, 392 286" 
+        fill="none" stroke="url(#ringGrad)" stroke-width="8" stroke-linecap="round" />
+
+  <!-- Remote Wave Nodes (Glowing orbital nodes) -->
+  <circle cx="150" cy="308" r="6" fill="#38bdf8" />
+  <circle cx="362" cy="308" r="6" fill="#f43f5e" />
+</svg>
