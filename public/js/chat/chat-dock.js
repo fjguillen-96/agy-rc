@@ -7,19 +7,20 @@
 import { icon } from '../ui/icons.js';
 import { post } from '../telemetry.js';
 import { cleanSpeechText } from './speech-cleaner.js';
+import { t, locale, getLang } from '../i18n.js';
 
-// Idioma del dictado (Web Speech y limpieza fonética): el del navegador, es-ES si es español.
-const dictLang = typeof navigator !== 'undefined' && /^es/i.test(navigator.language || '') ? 'es-ES' : 'en-US';
+// Idioma del dictado (Web Speech y limpieza fonética): el de la interfaz (es-ES | en-US).
+const dictLang = locale();
 
-const MODE_LABEL = { normal: 'Normal', plan: 'Plan', 'accept-edits': 'Aceptar ediciones' };
+const MODE_LABEL = { normal: 'Normal', plan: 'Plan', 'accept-edits': t('Aceptar ediciones') };
 const MODE_ORDER = ['normal', 'plan', 'accept-edits'];
-const EFFORT_LABEL = { low: 'Bajo', medium: 'Medio', high: 'Alto' };
+const EFFORT_LABEL = { low: t('Bajo'), medium: t('Medio'), high: t('Alto') };
 const MODE_DESC = {
-  normal: 'Pide confirmación antes de cada acción y cada edición de archivo.',
-  plan: 'Solo investiga y planifica: no ejecuta ni edita hasta que apruebes el plan.',
-  'accept-edits': 'Aplica ediciones de archivos automáticamente; sigue pidiendo permiso para comandos sensibles.',
+  normal: t('Pide confirmación antes de cada acción y cada edición de archivo.'),
+  plan: t('Solo investiga y planifica: no ejecuta ni edita hasta que apruebes el plan.'),
+  'accept-edits': t('Aplica ediciones de archivos automáticamente; sigue pidiendo permiso para comandos sensibles.'),
 };
-const AUTOAPPROVE_DESC = 'Antigravity ejecuta comandos y edita archivos sin preguntar. Desactívalo para modo Plan o si quieres revisar.';
+const AUTOAPPROVE_DESC = t('Antigravity ejecuta comandos y edita archivos sin preguntar. Desactívalo para modo Plan o si quieres revisar.');
 
 const MAX_ATTACHMENTS = 10;
 const MAX_ATTACHMENT_BYTES = 30 * 1024 * 1024;
@@ -65,7 +66,7 @@ export function mount(root, deps) {
   let attId = 0;
 
   root.innerHTML = `
-    <div class="ccomposer__slash" id="cc-slash" role="listbox" aria-label="Comandos" hidden></div>
+    <div class="ccomposer__slash" id="cc-slash" role="listbox" aria-label="${t('Comandos')}" hidden></div>
     <div class="ccomposer__attachments" id="cc-attachments" hidden></div>
     <div class="ccomposer__rec-bar" id="cc-rec-bar" hidden>
       <div class="ccomposer__rec-meta">
@@ -76,21 +77,21 @@ export function mount(root, deps) {
         <canvas id="cc-rec-canvas" height="36"></canvas>
       </div>
       <div class="ccomposer__rec-ctrls" id="cc-rec-ctrls">
-        <button type="button" class="ccomposer__rec-action ccomposer__rec-action--cancel" id="cc-rec-cancel" title="Cancelar y descartar" aria-label="Cancelar">${icon('close')}</button>
-        <button type="button" class="ccomposer__rec-action ccomposer__rec-action--done" id="cc-rec-done" title="Finalizar y transcribir" aria-label="Finalizar">${icon('check')}</button>
+        <button type="button" class="ccomposer__rec-action ccomposer__rec-action--cancel" id="cc-rec-cancel" title="${t('Cancelar y descartar')}" aria-label="${t('Cancelar')}">${icon('close')}</button>
+        <button type="button" class="ccomposer__rec-action ccomposer__rec-action--done" id="cc-rec-done" title="${t('Finalizar y transcribir')}" aria-label="${t('Finalizar')}">${icon('check')}</button>
       </div>
       <div class="ccomposer__rec-transcribing" id="cc-rec-transcribing" hidden>
         <span class="ccomposer__rec-spinner"></span>
-        <span>Transcribiendo con Gemini 3.5…</span>
+        <span>${t('Transcribiendo con Gemini 3.5…')}</span>
       </div>
     </div>
-    <textarea class="ccomposer__textarea" id="cc-textarea" placeholder="Mensaje para Antigravity…"
+    <textarea class="ccomposer__textarea" id="cc-textarea" placeholder="${t('Mensaje para Antigravity…')}"
       autocapitalize="sentences" autocomplete="off" spellcheck="true" rows="1"></textarea>
     <div class="ccomposer__row">
-      <button type="button" class="ccomposer__icon-btn" id="cc-plus" aria-label="Adjuntar">${icon('plus')}</button>
+      <button type="button" class="ccomposer__icon-btn" id="cc-plus" aria-label="${t('Adjuntar')}">${icon('plus')}</button>
       <div class="ccomposer__chips" id="cc-chips"></div>
-      <button type="button" class="ccomposer__icon-btn ccomposer__mic" id="cc-mic" aria-label="Dictado por voz" aria-pressed="false">${icon('mic')}</button>
-      <button type="button" class="ccomposer__send" id="cc-send" aria-label="Enviar">${icon('send')}</button>
+      <button type="button" class="ccomposer__icon-btn ccomposer__mic" id="cc-mic" aria-label="${t('Dictado por voz')}" aria-pressed="false">${icon('mic')}</button>
+      <button type="button" class="ccomposer__send" id="cc-send" aria-label="${t('Enviar')}">${icon('send')}</button>
     </div>
   `;
 
@@ -143,11 +144,11 @@ export function mount(root, deps) {
     const files = Array.from(fileList || []);
     for (const file of files) {
       if (pending.length >= MAX_ATTACHMENTS) {
-        toast(`Máximo ${MAX_ATTACHMENTS} adjuntos`, { type: 'error' });
+        toast(t('Máximo {n} adjuntos', { n: MAX_ATTACHMENTS }), { type: 'error' });
         break;
       }
       if (file.size > MAX_ATTACHMENT_BYTES) {
-        toast(`"${file.name}" supera 30 MB`, { type: 'error' });
+        toast(t('"{name}" supera 30 MB', { name: file.name }), { type: 'error' });
         continue;
       }
       const isImage = file.type.startsWith('image/');
@@ -198,7 +199,7 @@ export function mount(root, deps) {
         rm.type = 'button';
         rm.className = 'ccomposer__thumb-remove';
         rm.innerHTML = icon('close');
-        rm.setAttribute('aria-label', 'Quitar adjunto');
+        rm.setAttribute('aria-label', t('Quitar adjunto'));
         rm.addEventListener('click', (ev) => {
           ev.stopPropagation();
           removeAttachment(item.id);
@@ -210,13 +211,13 @@ export function mount(root, deps) {
   }
 
   function openAttachSheet() {
-    sheets.open('Adjuntar', (body, close) => {
+    sheets.open(t('Adjuntar'), (body, close) => {
       const list = document.createElement('div');
       list.className = 'option-list';
       const rows = [
-        ['camera', 'Cámara', () => fileCamera.click()],
-        ['photo', 'Fotos', () => filePhotos.click()],
-        ['file', 'Archivos', () => fileAny.click()],
+        ['camera', t('Cámara'), () => fileCamera.click()],
+        ['photo', t('Fotos'), () => filePhotos.click()],
+        ['file', t('Archivos'), () => fileAny.click()],
       ];
       for (const [iconName, label, action] of rows) {
         const row = document.createElement('button');
@@ -276,7 +277,7 @@ export function mount(root, deps) {
     const mode = computeMode();
     sendBtn.dataset.mode = mode;
     sendBtn.innerHTML = icon(mode === 'stop' ? 'stop' : 'send');
-    sendBtn.setAttribute('aria-label', mode === 'stop' ? 'Detener' : 'Enviar');
+    sendBtn.setAttribute('aria-label', mode === 'stop' ? t('Detener') : t('Enviar'));
     if (mode === 'stop') {
       sendBtn.disabled = false;
     } else {
@@ -316,7 +317,7 @@ export function mount(root, deps) {
     if (pending.length > 0) {
       const cid = chatId ? chatId() : null;
       if (!cid) {
-        toast('No hay ningún chat abierto', { type: 'error' });
+        toast(t('No hay ningún chat abierto'), { type: 'error' });
         return;
       }
       uploading = true;
@@ -337,7 +338,7 @@ export function mount(root, deps) {
         for (const item of pending) item.status = 'pending';
         renderAttachments();
         renderSendState();
-        toast(`No se pudo subir el adjunto: ${err.message}`, { type: 'error' });
+        toast(t('No se pudo subir el adjunto: {message}', { message: err.message }), { type: 'error' });
         return;
       }
       uploading = false;
@@ -472,7 +473,7 @@ export function mount(root, deps) {
       if (rec !== recognition) return;
       if (dictStats) dictStats.errors.push(ev.error || '?');
       if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') {
-        toast('Permite el micrófono en Ajustes › Safari', { type: 'error' });
+        toast(t('Permite el micrófono en Ajustes › Safari'), { type: 'error' });
         stopDictation(`error:${ev.error}`);
         return;
       }
@@ -481,7 +482,7 @@ export function mount(root, deps) {
         // dejamos que `onend` decida si se reabre.
         return;
       }
-      toast('No se pudo usar el dictado', { type: 'error' });
+      toast(t('No se pudo usar el dictado'), { type: 'error' });
       stopDictation(`error:${ev.error}`);
     };
     rec.onend = () => {
@@ -738,11 +739,11 @@ function downsampleAndConvertToInt16(buffer, inputSampleRate, outputSampleRate =
     }
 
     if (!window.isSecureContext) {
-      toast('El micrófono requiere conexión segura (HTTPS). Accede a través de tu URL HTTPS de Tailscale', { type: 'error', duration: 7000 });
+      toast(t('El micrófono requiere conexión segura (HTTPS). Accede a través de tu URL HTTPS de Tailscale'), { type: 'error', duration: 7000 });
       return;
     }
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      toast('Este navegador no soporta grabación directa de audio en esta vista', { type: 'error', duration: 6000 });
+      toast(t('Este navegador no soporta grabación directa de audio en esta vista'), { type: 'error', duration: 6000 });
       return;
     }
     try {
@@ -750,9 +751,9 @@ function downsampleAndConvertToInt16(buffer, inputSampleRate, outputSampleRate =
     } catch (err) {
       const isDenied = err && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError');
       if (isDenied) {
-        toast('Micrófono denegado: toca "aA" en la barra de URL de Safari -> Configuración del sitio web -> Micrófono: Permitir', { type: 'error', duration: 8000 });
+        toast(t('Micrófono denegado: toca "aA" en la barra de URL de Safari -> Configuración del sitio web -> Micrófono: Permitir'), { type: 'error', duration: 8000 });
       } else {
-        toast(`Error al acceder al micrófono (${err ? err.name : 'desconocido'})`, { type: 'error', duration: 5000 });
+        toast(t('Error al acceder al micrófono ({name})', { name: err ? err.name : t('desconocido') }), { type: 'error', duration: 5000 });
       }
       return;
     }
@@ -785,7 +786,7 @@ function downsampleAndConvertToInt16(buffer, inputSampleRate, outputSampleRate =
             hasLiveTranscription = true;
             baseTextBeforeRecord = cleanSpeechText(
               joinDictation(baseTextBeforeRecord, msg.text),
-              'es-ES'
+              dictLang
             );
             textarea.value = baseTextBeforeRecord;
             autoGrow();
@@ -876,7 +877,7 @@ function downsampleAndConvertToInt16(buffer, inputSampleRate, outputSampleRate =
 
     // Si la transcripción en directo ya completó el texto, aplicamos el limpiador final directamente
     if (hasLiveTranscription && textarea.value.trim()) {
-      textarea.value = cleanSpeechText(textarea.value, 'es-ES');
+      textarea.value = cleanSpeechText(textarea.value, dictLang);
       autoGrow();
       renderSendState();
       recBarEl.hidden = true;
@@ -911,14 +912,14 @@ function downsampleAndConvertToInt16(buffer, inputSampleRate, outputSampleRate =
         body: blob,
       });
       if (res && res.text) {
-        textarea.value = cleanSpeechText(joinDictation(baseTextBeforeRecord, res.text), 'es-ES');
+        textarea.value = cleanSpeechText(joinDictation(baseTextBeforeRecord, res.text), dictLang);
         autoGrow();
         renderSendState();
       } else {
-        toast('Gemini no detectó voz en el audio', { type: 'info' });
+        toast(t('Gemini no detectó voz en el audio'), { type: 'info' });
       }
     } catch (err) {
-      toast(`Error Gemini Transcribe: ${err.message}`, { type: 'error' });
+      toast(t('Error Gemini Transcribe: {message}', { message: err.message }), { type: 'error' });
     } finally {
       isTranscribing = false;
       micBtn.disabled = false;
@@ -962,7 +963,7 @@ function downsampleAndConvertToInt16(buffer, inputSampleRate, outputSampleRate =
         startGeminiRecording();
         return;
       }
-      toast('Este navegador no soporta reconocimiento de voz nativo', { type: 'info', duration: 4000 });
+      toast(t('Este navegador no soporta reconocimiento de voz nativo'), { type: 'info', duration: 4000 });
       return;
     }
     startDictation();
@@ -1013,12 +1014,13 @@ function downsampleAndConvertToInt16(buffer, inputSampleRate, outputSampleRate =
   }
 
   function agyCommandItems() {
+    const en = getLang() === 'en';
     return agyCommands.map((c) => {
       const name = c.cmd.slice(1);
       return {
         cmd: c.cmd,
         label: c.group === 'skill' ? `Skill · ${name}` : name.charAt(0).toUpperCase() + name.slice(1),
-        desc: c.desc,
+        desc: en && c.descEn ? c.descEn : c.desc,
         icon: c.group === 'skill' ? 'spark' : c.kind === 'cli' ? 'terminal' : 'slash',
         group: 'agy',
         run: () => {
@@ -1035,20 +1037,20 @@ function downsampleAndConvertToInt16(buffer, inputSampleRate, outputSampleRate =
 
   function appCommandItems() {
     const list = [
-      { cmd: '/modelo', alias: '/model', label: 'Cambiar modelo', desc: 'Elige el modelo de Antigravity', icon: 'diamond', run: () => openModelSheet() },
-      { cmd: '/esfuerzo', alias: '/effort', label: 'Cambiar esfuerzo', desc: 'Bajo · Medio · Alto', icon: 'bolt', run: () => openEffortSheet() },
-      { cmd: '/permisos', alias: '/mode', label: 'Permisos de edición', desc: 'Modo Normal · Plan · Aceptar ediciones y auto-aprobar', icon: 'mode', run: () => openPermissionsSheet() },
+      { cmd: '/modelo', alias: '/model', label: t('Cambiar modelo'), desc: t('Elige el modelo de Antigravity'), icon: 'diamond', run: () => openModelSheet() },
+      { cmd: '/esfuerzo', alias: '/effort', label: t('Cambiar esfuerzo'), desc: t('Bajo · Medio · Alto'), icon: 'bolt', run: () => openEffortSheet() },
+      { cmd: '/permisos', alias: '/mode', label: t('Permisos de edición'), desc: t('Modo Normal · Plan · Aceptar ediciones y auto-aprobar'), icon: 'mode', run: () => openPermissionsSheet() },
       {
         cmd: '/auto',
-        label: chat && chat.autoApprove ? 'Desactivar auto-aprobar' : 'Activar auto-aprobar',
+        label: chat && chat.autoApprove ? t('Desactivar auto-aprobar') : t('Activar auto-aprobar'),
         desc: AUTOAPPROVE_DESC,
         icon: 'check',
         run: () => applyPatch({ autoApprove: !(chat && chat.autoApprove) }),
       },
-      { cmd: '/adjuntar', alias: '/attach', label: 'Adjuntar', desc: 'Cámara, fotos o archivos', icon: 'plus', run: () => openAttachSheet() },
+      { cmd: '/adjuntar', alias: '/attach', label: t('Adjuntar'), desc: t('Cámara, fotos o archivos'), icon: 'plus', run: () => openAttachSheet() },
     ];
     if (isBusy()) {
-      list.push({ cmd: '/detener', alias: '/stop', label: 'Detener', desc: 'Interrumpe el turno en curso', icon: 'stop', run: () => onStop() });
+      list.push({ cmd: '/detener', alias: '/stop', label: t('Detener'), desc: t('Interrumpe el turno en curso'), icon: 'stop', run: () => onStop() });
     }
     for (const c of extraCommands) {
       if (c && typeof c.cmd === 'string' && typeof c.run === 'function') list.push(c);
@@ -1117,7 +1119,7 @@ function downsampleAndConvertToInt16(buffer, inputSampleRate, outputSampleRate =
     if (items.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'ccomposer__slash-empty';
-      empty.textContent = 'Ningún comando coincide';
+      empty.textContent = t('Ningún comando coincide');
       slashEl.appendChild(empty);
       return;
     }
@@ -1126,7 +1128,7 @@ function downsampleAndConvertToInt16(buffer, inputSampleRate, outputSampleRate =
       if (!fq && (i === 0 || items[i - 1].group !== c.group)) {
         const head = document.createElement('div');
         head.className = 'ccomposer__slash-group';
-        head.textContent = c.group === 'agy' ? 'Antigravity' : 'App';
+        head.textContent = c.group === 'agy' ? 'Antigravity' : t('App');
         slashEl.appendChild(head);
       }
       const row = document.createElement('button');
@@ -1197,8 +1199,8 @@ function downsampleAndConvertToInt16(buffer, inputSampleRate, outputSampleRate =
   }
 
   function renderChips() {
-    setChipLabel(modelChip, chat && chat.model ? prettyModel(chat.model) : 'Modelo');
-    setChipLabel(effortChip, chat && chat.effort ? EFFORT_LABEL[chat.effort] || chat.effort : 'Esfuerzo');
+    setChipLabel(modelChip, chat && chat.model ? prettyModel(chat.model) : t('Modelo'));
+    setChipLabel(effortChip, chat && chat.effort ? EFFORT_LABEL[chat.effort] || chat.effort : t('Esfuerzo'));
     const modeLabel = chat && chat.mode ? MODE_LABEL[chat.mode] || chat.mode : '—';
     setChipLabel(permChip, chat && chat.autoApprove ? `${modeLabel} · auto` : modeLabel);
   }
@@ -1206,9 +1208,9 @@ function downsampleAndConvertToInt16(buffer, inputSampleRate, outputSampleRate =
   async function applyPatch(patch) {
     try {
       await onPatch(patch);
-      toast('Se aplicará en el próximo mensaje', { type: 'info' });
+      toast(t('Se aplicará en el próximo mensaje'), { type: 'info' });
     } catch (err) {
-      toast(`No se pudo aplicar el cambio: ${err.message}`, { type: 'error' });
+      toast(t('No se pudo aplicar el cambio: {message}', { message: err.message }), { type: 'error' });
     }
   }
 
@@ -1236,11 +1238,11 @@ function downsampleAndConvertToInt16(buffer, inputSampleRate, outputSampleRate =
   }
 
   function openModelSheet() {
-    sheets.open('Modelo', async (body, close) => {
-      body.innerHTML = '<div class="sheet__loading">Cargando modelos…</div>';
+    sheets.open(t('Modelo'), async (body, close) => {
+      body.innerHTML = `<div class="sheet__loading">${t('Cargando modelos…')}</div>`;
       const models = await getModels();
       if (!models || models.length === 0) {
-        body.innerHTML = '<p class="sheet__hint">No se pudo obtener la lista de modelos.</p>';
+        body.innerHTML = `<p class="sheet__hint">${t('No se pudo obtener la lista de modelos.')}</p>`;
         return;
       }
 
@@ -1301,10 +1303,10 @@ function downsampleAndConvertToInt16(buffer, inputSampleRate, outputSampleRate =
   // ---------- esfuerzo ----------
 
   function openEffortSheet() {
-    sheets.open('Esfuerzo', (body, close) => {
+    sheets.open(t('Esfuerzo'), (body, close) => {
       const seg = document.createElement('div');
       seg.className = 'segmented';
-      for (const [value, label] of [['low', 'Bajo'], ['medium', 'Medio'], ['high', 'Alto']]) {
+      for (const [value, label] of [['low', t('Bajo')], ['medium', t('Medio')], ['high', t('Alto')]]) {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'segmented__opt';
@@ -1338,7 +1340,7 @@ function downsampleAndConvertToInt16(buffer, inputSampleRate, outputSampleRate =
   // ---------- permisos de edición (modo + auto-aprobar) ----------
 
   function openPermissionsSheet() {
-    sheets.open('Permisos de edición', (body) => {
+    sheets.open(t('Permisos de edición'), (body) => {
       const currentMode = chat ? chat.mode : 'normal';
       const list = document.createElement('div');
       list.className = 'option-list';
@@ -1382,7 +1384,7 @@ function downsampleAndConvertToInt16(buffer, inputSampleRate, outputSampleRate =
       toggleRow.className = 'field toggle-row ccomposer__perm-toggle';
       toggleRow.innerHTML = `
         <div class="toggle-row__text">
-          <span>Auto-aprobar herramientas</span>
+          <span>${t('Auto-aprobar herramientas')}</span>
           <span class="toggle-row__desc">${AUTOAPPROVE_DESC}</span>
         </div>
         <button type="button" class="toggle" id="cc-autoapprove-toggle" role="switch"></button>

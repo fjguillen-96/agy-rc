@@ -4,13 +4,14 @@
 
 import { icon } from '../ui/icons.js';
 import { getProjectsRoot, relativeToRoot } from '../ui/directory.js';
+import { t } from '../i18n.js';
 
-const THINKING_LABEL = { collapsed: 'Plegado', expanded: 'Desplegado', hidden: 'Oculto' };
+const THINKING_LABEL = { collapsed: t('Plegado'), expanded: t('Desplegado'), hidden: t('Oculto') };
 const THINKING_ORDER = ['collapsed', 'expanded', 'hidden'];
 const THINKING_DESC = {
-  collapsed: 'El razonamiento aparece plegado; tócalo para desplegarlo.',
-  expanded: 'El razonamiento aparece desplegado por defecto.',
-  hidden: 'No se muestra el razonamiento (ni los mensajes que son solo pensamiento).',
+  collapsed: t('El razonamiento aparece plegado; tócalo para desplegarlo.'),
+  expanded: t('El razonamiento aparece desplegado por defecto.'),
+  hidden: t('No se muestra el razonamiento (ni los mensajes que son solo pensamiento).'),
 };
 
 function closeCtxMenu() {
@@ -41,15 +42,15 @@ export function mount(root, deps) {
   });
 
   root.innerHTML = `
-    <button class="icon-btn" id="chat-btn-menu" type="button" aria-label="Abrir menú">${icon('menu')}</button>
+    <button class="icon-btn" id="chat-btn-menu" type="button" aria-label="${t('Abrir menú')}">${icon('menu')}</button>
     <div class="topbar__info">
       <span class="topbar__conn-dot" id="chat-topbar-dot" data-status="none"></span>
       <div class="topbar__text" id="chat-topbar-text">
-        <span class="topbar__session-name" id="chat-topbar-title">Sin chat</span>
+        <span class="topbar__session-name" id="chat-topbar-title">${t('Sin chat')}</span>
         <span class="topbar__session-cwd" id="chat-topbar-cwd"></span>
       </div>
     </div>
-    <button class="icon-btn" id="chat-btn-kebab" type="button" aria-label="Menú del chat">${icon('kebab')}</button>
+    <button class="icon-btn" id="chat-btn-kebab" type="button" aria-label="${t('Menú del chat')}">${icon('kebab')}</button>
   `;
 
   const dot = root.querySelector('#chat-topbar-dot');
@@ -61,11 +62,11 @@ export function mount(root, deps) {
 
   function render() {
     if (current) {
-      titleEl.textContent = current.title || '(sin título)';
+      titleEl.textContent = current.title || t('(sin título)');
       cwdEl.textContent = relativeToRoot(current.cwd || '', projectsRoot);
       dot.dataset.status = current.state === 'running' || current.state === 'starting' ? 'running' : 'dead';
     } else {
-      titleEl.textContent = 'Sin chat';
+      titleEl.textContent = t('Sin chat');
       cwdEl.textContent = '';
       dot.dataset.status = 'none';
     }
@@ -88,35 +89,35 @@ export function mount(root, deps) {
 
   async function doRename() {
     if (!current) return;
-    const next = window.prompt('Nuevo título del chat:', current.title || '');
+    const next = window.prompt(t('Nuevo título del chat:'), current.title || '');
     if (next === null || !next.trim() || next.trim() === current.title) return;
     try {
       const updated = await api(`/chats/${encodeURIComponent(current.id)}`, {
         method: 'PATCH',
         body: JSON.stringify({ title: next.trim() }),
       });
-      toast('Chat renombrado', { type: 'success' });
+      toast(t('Chat renombrado'), { type: 'success' });
       onRenamed(updated);
     } catch (err) {
-      toast(`No se pudo renombrar: ${err.message}`, { type: 'error' });
+      toast(t('No se pudo renombrar: {message}', { message: err.message }), { type: 'error' });
     }
   }
 
   async function doDelete() {
     if (!current) return;
-    if (!window.confirm(`¿Borrar el chat "${current.title || current.id}"?`)) return;
+    if (!window.confirm(t('¿Borrar el chat "{title}"?', { title: current.title || current.id }))) return;
     try {
       await api(`/chats/${encodeURIComponent(current.id)}`, { method: 'DELETE' });
-      toast('Chat borrado', { type: 'success' });
+      toast(t('Chat borrado'), { type: 'success' });
       onDeleted();
     } catch (err) {
-      toast(`No se pudo borrar: ${err.message}`, { type: 'error' });
+      toast(t('No se pudo borrar: {message}', { message: err.message }), { type: 'error' });
     }
   }
 
   function openThinkingSheet() {
     if (!sheets || !onThinkingMode) return;
-    sheets.open('Razonamiento', (body, close) => {
+    sheets.open(t('Razonamiento'), (body, close) => {
       const currentMode = getThinkingMode ? getThinkingMode() : 'collapsed';
       const list = document.createElement('div');
       list.className = 'option-list';
@@ -168,7 +169,7 @@ export function mount(root, deps) {
     menu.style.right = `${window.innerWidth - rect.right}px`;
 
     if (onNewConversation) {
-      menu.appendChild(menuItem('plus', 'Nueva conversación', () => {
+      menu.appendChild(menuItem('plus', t('Nueva conversación'), () => {
         closeCtxMenu();
         onNewConversation();
       }));
@@ -177,20 +178,20 @@ export function mount(root, deps) {
       menu.appendChild(sep0);
     }
 
-    menu.appendChild(menuItem('pencil', 'Renombrar', doRename));
-    menu.appendChild(menuItem('trash', 'Borrar chat', doDelete, { danger: true }));
+    menu.appendChild(menuItem('pencil', t('Renombrar'), doRename));
+    menu.appendChild(menuItem('trash', t('Borrar chat'), doDelete, { danger: true }));
 
     const sep1 = document.createElement('hr');
     sep1.className = 'ctx-menu__sep';
     menu.appendChild(sep1);
 
     const thinkingMode = getThinkingMode ? getThinkingMode() : 'collapsed';
-    menu.appendChild(menuItem('spark', `Razonamiento: ${THINKING_LABEL[thinkingMode] || thinkingMode}`, () => {
+    menu.appendChild(menuItem('spark', t('Razonamiento: {mode}', { mode: THINKING_LABEL[thinkingMode] || thinkingMode }), () => {
       closeCtxMenu();
       openThinkingSheet();
     }));
     if (onOpenLog) {
-      menu.appendChild(menuItem('file', 'Registro de agy (CLI)', () => {
+      menu.appendChild(menuItem('file', t('Registro de agy (CLI)'), () => {
         closeCtxMenu();
         onOpenLog();
       }));

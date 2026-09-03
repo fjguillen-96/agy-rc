@@ -6,11 +6,12 @@
 
 import { icon } from '../ui/icons.js';
 import { buildNewFolderForm, getProjectsRoot, toRelative } from '../ui/directory.js';
+import { t } from '../i18n.js';
 
 const MODES = [
-  { value: 'normal', label: 'Normal' },
-  { value: 'plan', label: 'Plan' },
-  { value: 'accept-edits', label: 'Aceptar ediciones' },
+  { value: 'normal', label: t('Normal') },
+  { value: 'plan', label: t('Plan') },
+  { value: 'accept-edits', label: t('Aceptar ediciones') },
 ];
 
 const DEFAULT_MODEL_ID = 'gemini-3.8-flash-high';
@@ -28,12 +29,12 @@ function timeAgo(iso) {
   if (Number.isNaN(then)) return '';
   const diffMs = Date.now() - then;
   const mins = Math.floor(diffMs / 60000);
-  if (mins < 1) return 'hace un momento';
-  if (mins < 60) return `hace ${mins} min`;
+  if (mins < 1) return t('hace un momento');
+  if (mins < 60) return t('hace {n} min', { n: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `hace ${hours} h`;
+  if (hours < 24) return t('hace {n} h', { n: hours });
   const days = Math.floor(hours / 24);
-  return `hace ${days} d`;
+  return t('hace {n} d', { n: days });
 }
 
 /**
@@ -59,31 +60,31 @@ export function mount(root, backdrop, deps) {
   root.innerHTML = `
     <div class="sheet__handle"></div>
     <div class="sheet__header">
-      <h2>Nuevo chat</h2>
-      <button type="button" class="sheet__close" aria-label="Cerrar">${icon('close')}</button>
+      <h2>${t('Nuevo chat')}</h2>
+      <button type="button" class="sheet__close" aria-label="${t('Cerrar')}">${icon('close')}</button>
     </div>
     <div class="sheet__body">
       <div class="field">
-        <label>Carpeta de trabajo</label>
+        <label>${t('Carpeta de trabajo')}</label>
         <div class="dir-picker">
           <div class="dir-picker__current-card">
             <div class="dir-picker__current-icon">${icon('folder')}</div>
             <div class="dir-picker__current-info">
-              <span class="dir-picker__current-label">Carpeta seleccionada</span>
-              <span class="dir-picker__current-name" id="nc-current-name">~ (raíz)</span>
+              <span class="dir-picker__current-label">${t('Carpeta seleccionada')}</span>
+              <span class="dir-picker__current-name" id="nc-current-name">${t('~ (raíz)')}</span>
             </div>
-            <button type="button" class="dir-picker__pin-btn" id="nc-pin-btn" title="Fijar como carpeta por defecto">
+            <button type="button" class="dir-picker__pin-btn" id="nc-pin-btn" title="${t('Fijar como carpeta por defecto')}">
               ${icon('star')}
-              <span id="nc-pin-text">Fijar</span>
+              <span id="nc-pin-text">${t('Fijar')}</span>
             </button>
           </div>
 
           <div class="dir-picker__quick-chips" id="nc-quick-chips"></div>
 
           <div class="dir-picker__nav-bar">
-            <button type="button" class="dir-picker__up-btn" id="nc-up-btn" title="Subir un nivel" disabled>
+            <button type="button" class="dir-picker__up-btn" id="nc-up-btn" title="${t('Subir un nivel')}" disabled>
               ${icon('arrowLeft')}
-              <span>Subir</span>
+              <span>${t('Subir')}</span>
             </button>
             <div class="dir-picker__breadcrumb-scroll" id="nc-breadcrumb"></div>
           </div>
@@ -95,54 +96,54 @@ export function mount(root, backdrop, deps) {
           <div class="dir-picker__bottom-bar">
             <button type="button" class="btn btn--subtle dir-picker__new-folder" id="nc-new-folder-btn">
               ${icon('folderPlus')}
-              <span>Nueva carpeta</span>
+              <span>${t('Nueva carpeta')}</span>
             </button>
             <button type="button" class="dir-picker__manual-toggle" id="nc-manual-toggle">
-              <span>Ruta manual</span>
+              <span>${t('Ruta manual')}</span>
               ${icon('pencil')}
             </button>
           </div>
           <div id="nc-new-folder-slot"></div>
           <div class="dir-picker__manual-row" id="nc-manual-row" hidden>
-            <input type="text" id="nc-cwd" placeholder="Ruta relativa a proyectos" autocomplete="off" autocapitalize="off" spellcheck="false">
+            <input type="text" id="nc-cwd" placeholder="${t('Ruta relativa a proyectos')}" autocomplete="off" autocapitalize="off" spellcheck="false">
           </div>
         </div>
       </div>
       <div class="field">
-        <label for="nc-title">Título (opcional)</label>
-        <input type="text" id="nc-title" placeholder="Se usa el primer mensaje si lo dejas vacío" autocomplete="off">
+        <label for="nc-title">${t('Título (opcional)')}</label>
+        <input type="text" id="nc-title" placeholder="${t('Se usa el primer mensaje si lo dejas vacío')}" autocomplete="off">
       </div>
       <div class="field">
-        <label for="nc-model">Modelo</label>
+        <label for="nc-model">${t('Modelo')}</label>
         <select id="nc-model"></select>
       </div>
       <div class="field">
-        <label>Esfuerzo</label>
+        <label>${t('Esfuerzo')}</label>
         <div class="segmented" id="nc-effort"></div>
       </div>
       <div class="field">
-        <label>Modo</label>
+        <label>${t('Modo')}</label>
         <div class="segmented" id="nc-mode"></div>
       </div>
       <div class="field toggle-row" id="nc-autoapprove-row">
         <div class="toggle-row__text">
-          <span>Auto-aprobar herramientas</span>
-          <span class="toggle-row__desc">Antigravity ejecuta comandos y edita archivos sin preguntar. Desactívalo para modo Plan o si quieres revisar.</span>
+          <span>${t('Auto-aprobar herramientas')}</span>
+          <span class="toggle-row__desc">${t('Antigravity ejecuta comandos y edita archivos sin preguntar. Desactívalo para modo Plan o si quieres revisar.')}</span>
         </div>
         <button type="button" class="toggle" id="nc-autoapprove" role="switch" aria-checked="true"><span class="toggle__knob"></span></button>
       </div>
       <div class="field toggle-row" id="nc-new-project-row">
         <div class="toggle-row__text">
-          <span>Reindexar proyecto desde cero</span>
-          <span class="toggle-row__desc">Fuerza a Antigravity a analizar el código como si fuera nuevo, sin reutilizar el índice ni la memoria previa de esta carpeta.</span>
+          <span>${t('Reindexar proyecto desde cero')}</span>
+          <span class="toggle-row__desc">${t('Fuerza a Antigravity a analizar el código como si fuera nuevo, sin reutilizar el índice ni la memoria previa de esta carpeta.')}</span>
         </div>
         <button type="button" class="toggle" id="nc-new-project" role="switch" aria-checked="false"><span class="toggle__knob"></span></button>
       </div>
       <div class="prompt-actions">
-        <button type="button" class="btn" data-action="cancel">Cancelar</button>
-        <button type="button" class="btn btn--primary" data-action="create">Crear chat</button>
+        <button type="button" class="btn" data-action="cancel">${t('Cancelar')}</button>
+        <button type="button" class="btn btn--primary" data-action="create">${t('Crear chat')}</button>
       </div>
-      <button type="button" class="btn nc-resume-btn" id="nc-resume-btn">Reanudar conversación anterior…</button>
+      <button type="button" class="btn nc-resume-btn" id="nc-resume-btn">${t('Reanudar conversación anterior…')}</button>
       <div id="nc-resume-slot"></div>
     </div>
   `;
@@ -215,7 +216,7 @@ export function mount(root, backdrop, deps) {
     const supportsEffort = !current || Boolean(current.effort);
     renderSegmented(
       effortSeg,
-      [{ value: 'low', label: 'Bajo' }, { value: 'medium', label: 'Medio' }, { value: 'high', label: 'Alto' }],
+      [{ value: 'low', label: t('Bajo') }, { value: 'medium', label: t('Medio') }, { value: 'high', label: t('Alto') }],
       supportsEffort ? effort : null,
       (v) => {
         effort = v;
@@ -326,10 +327,10 @@ export function mount(root, backdrop, deps) {
     const def = getDefaultFolder();
     const isPinned = def !== null && (def === currentPath || def === currentDisplay);
     pinBtn.dataset.pinned = isPinned ? 'true' : 'false';
-    pinText.textContent = isPinned ? 'Por defecto' : 'Fijar';
+    pinText.textContent = isPinned ? t('Por defecto') : t('Fijar');
     pinBtn.title = isPinned
-      ? 'Carpeta fijada por defecto (toca para desfijar)'
-      : 'Fijar como carpeta por defecto para nuevos chats';
+      ? t('Carpeta fijada por defecto (toca para desfijar)')
+      : t('Fijar como carpeta por defecto para nuevos chats');
   }
 
   pinBtn.addEventListener('click', () => {
@@ -337,10 +338,10 @@ export function mount(root, backdrop, deps) {
     const isPinned = def !== null && (def === currentPath || def === currentDisplay);
     if (isPinned) {
       setDefaultFolder(null);
-      toast('Se quitó la carpeta por defecto', { type: 'info' });
+      toast(t('Se quitó la carpeta por defecto'), { type: 'info' });
     } else {
       setDefaultFolder(currentPath);
-      toast(`Fijada "${currentDisplay || currentPath}" como carpeta por defecto`, { type: 'success' });
+      toast(t('Fijada "{folder}" como carpeta por defecto', { folder: currentDisplay || currentPath }), { type: 'success' });
     }
     updatePinButtonUI();
     renderQuickChips();
@@ -370,8 +371,8 @@ export function mount(root, backdrop, deps) {
       chip.className = 'dir-picker__chip dir-picker__chip--pinned';
       const label = def.includes('/') ? basename(def) : def;
       chip.innerHTML = `${icon('star')}<span></span>`;
-      chip.querySelector('span').textContent = `Por defecto: ${label}`;
-      chip.title = `Ir a ${def}`;
+      chip.querySelector('span').textContent = t('Por defecto: {label}', { label });
+      chip.title = t('Ir a {path}', { path: def });
       chip.addEventListener('click', () => navigateTo(def));
       quickChipsEl.appendChild(chip);
       count++;
@@ -384,8 +385,8 @@ export function mount(root, backdrop, deps) {
       chip.className = 'dir-picker__chip dir-picker__chip--last';
       const label = last.includes('/') ? basename(last) : last;
       chip.innerHTML = `${icon('history')}<span></span>`;
-      chip.querySelector('span').textContent = `Última: ${label}`;
-      chip.title = `Ir a ${last}`;
+      chip.querySelector('span').textContent = t('Última: {label}', { label });
+      chip.title = t('Ir a {path}', { path: last });
       chip.addEventListener('click', () => navigateTo(last));
       quickChipsEl.appendChild(chip);
       count++;
@@ -396,8 +397,8 @@ export function mount(root, backdrop, deps) {
       const chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'dir-picker__chip';
-      chip.innerHTML = `${icon('home')}<span>Inicio ~</span>`;
-      chip.title = 'Ir a la carpeta personal ~';
+      chip.innerHTML = `${icon('home')}<span>${t('Inicio ~')}</span>`;
+      chip.title = t('Ir a la carpeta personal ~');
       chip.addEventListener('click', () => navigateTo('~'));
       quickChipsEl.appendChild(chip);
       count++;
@@ -408,8 +409,8 @@ export function mount(root, backdrop, deps) {
       const chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'dir-picker__chip';
-      chip.innerHTML = `<span>/ (raíz)</span>`;
-      chip.title = 'Ir a la raíz del sistema /';
+      chip.innerHTML = `<span>${t('/ (raíz)')}</span>`;
+      chip.title = t('Ir a la raíz del sistema /');
       chip.addEventListener('click', () => navigateTo('/'));
       quickChipsEl.appendChild(chip);
       count++;
@@ -431,7 +432,7 @@ export function mount(root, backdrop, deps) {
     rootBtn.type = 'button';
     rootBtn.className = 'dir-picker__crumb-btn';
     rootBtn.textContent = isHomeRel ? '~' : '/';
-    rootBtn.title = isHomeRel ? 'Ir a la carpeta personal ~' : 'Ir a la raíz del sistema /';
+    rootBtn.title = isHomeRel ? t('Ir a la carpeta personal ~') : t('Ir a la raíz del sistema /');
     rootBtn.addEventListener('click', () => navigateTo(isHomeRel ? '~' : '/'));
     breadcrumbEl.appendChild(rootBtn);
 
@@ -464,8 +465,8 @@ export function mount(root, backdrop, deps) {
       empty.className = 'dir-picker__empty';
       empty.innerHTML = `
         <span style="color:#a78bfa">${icon('folder')}</span>
-        <span>Sin subcarpetas en este nivel</span>
-        <span style="font-size:11px;color:var(--text-faint)">Antigravity trabajará en esta carpeta</span>
+        <span>${t('Sin subcarpetas en este nivel')}</span>
+        <span style="font-size:11px;color:var(--text-faint)">${t('Antigravity trabajará en esta carpeta')}</span>
       `;
       dirListEl.appendChild(empty);
       return;
@@ -514,7 +515,7 @@ export function mount(root, backdrop, deps) {
       dirs = res.dirs || [];
     } catch (err) {
       dirs = [];
-      toast(`No se pudo listar el directorio: ${err.message}`, { type: 'error' });
+      toast(t('No se pudo listar el directorio: {message}', { message: err.message }), { type: 'error' });
     }
     currentNameEl.textContent = currentDisplay || '~';
     cwdInput.value = currentPath;
@@ -557,7 +558,7 @@ export function mount(root, backdrop, deps) {
   // ---------- modelos ----------
 
   async function loadModels() {
-    modelSelect.innerHTML = '<option>Cargando…</option>';
+    modelSelect.innerHTML = `<option>${t('Cargando…')}</option>`;
     modelSelect.disabled = true;
     try {
       const res = await api('/agy/models');
@@ -572,7 +573,7 @@ export function mount(root, backdrop, deps) {
     if (!models || models.length === 0) {
       const opt = document.createElement('option');
       opt.value = '';
-      opt.textContent = models === null ? 'No disponible (se usará el modelo por defecto)' : 'Sin modelos';
+      opt.textContent = models === null ? t('No disponible (se usará el modelo por defecto)') : t('Sin modelos');
       modelSelect.appendChild(opt);
       modelSelect.disabled = true;
       selectedModelId = '';
@@ -669,7 +670,7 @@ export function mount(root, backdrop, deps) {
 
   async function openResumeList() {
     resumeBtn.hidden = true;
-    resumeSlot.innerHTML = '<div class="sheet__loading">Cargando conversaciones…</div>';
+    resumeSlot.innerHTML = `<div class="sheet__loading">${t('Cargando conversaciones…')}</div>`;
     let items = [];
     try {
       const res = await api('/agy/conversations?limit=50');
@@ -678,12 +679,12 @@ export function mount(root, backdrop, deps) {
       resumeSlot.innerHTML = '';
       const p = document.createElement('p');
       p.className = 'sheet__hint';
-      p.textContent = `No se pudieron cargar las conversaciones: ${err.message}`;
+      p.textContent = t('No se pudieron cargar las conversaciones: {message}', { message: err.message });
       resumeSlot.appendChild(p);
       const back = document.createElement('button');
       back.type = 'button';
       back.className = 'btn';
-      back.textContent = 'Volver';
+      back.textContent = t('Volver');
       back.addEventListener('click', closeResumeList);
       resumeSlot.appendChild(back);
       return;
@@ -693,12 +694,12 @@ export function mount(root, backdrop, deps) {
     if (items.length === 0) {
       const p = document.createElement('p');
       p.className = 'sheet__hint';
-      p.textContent = 'No hay conversaciones anteriores.';
+      p.textContent = t('No hay conversaciones anteriores.');
       resumeSlot.appendChild(p);
       const back = document.createElement('button');
       back.type = 'button';
       back.className = 'btn';
-      back.textContent = 'Volver';
+      back.textContent = t('Volver');
       back.addEventListener('click', closeResumeList);
       resumeSlot.appendChild(back);
       return;
@@ -715,7 +716,7 @@ export function mount(root, backdrop, deps) {
       top.className = 'option-row__top';
       const label = document.createElement('span');
       label.className = 'option-row__label';
-      label.textContent = conv.title || '(sin título)';
+      label.textContent = conv.title || t('(sin título)');
       top.appendChild(label);
       row.appendChild(top);
 
@@ -734,7 +735,7 @@ export function mount(root, backdrop, deps) {
     back.type = 'button';
     back.className = 'btn';
     back.style.marginTop = '10px';
-    back.textContent = 'Volver';
+    back.textContent = t('Volver');
     back.addEventListener('click', closeResumeList);
     resumeSlot.appendChild(back);
   }
@@ -766,7 +767,7 @@ export function mount(root, backdrop, deps) {
       close();
       onCreated(chat);
     } catch (err) {
-      toast(err.message || 'No se pudo reanudar la conversación', { type: 'error' });
+      toast(err.message || t('No se pudo reanudar la conversación'), { type: 'error' });
     } finally {
       createBtn.disabled = false;
     }
@@ -845,7 +846,7 @@ export function mount(root, backdrop, deps) {
       close();
       onCreated(chat);
     } catch (err) {
-      toast(err.message || 'No se pudo crear el chat', { type: 'error' });
+      toast(err.message || t('No se pudo crear el chat'), { type: 'error' });
     } finally {
       createBtn.disabled = false;
     }

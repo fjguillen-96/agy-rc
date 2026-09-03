@@ -4,6 +4,7 @@
 // `output`/`error` en <pre> con scroll propio.
 
 import { icon } from '../ui/icons.js';
+import { t } from '../i18n.js';
 
 const NAME_ICON = {
   run_command: 'terminal',
@@ -38,7 +39,7 @@ function iconForTool(name) {
 }
 
 function labelForTool(name) {
-  return NAME_LABEL[name] || String(name || 'Herramienta');
+  return NAME_LABEL[name] ? t(NAME_LABEL[name]) : String(name || t('Herramienta'));
 }
 
 /**
@@ -105,7 +106,7 @@ export function renderToolCard(msg) {
   } else {
     const empty = document.createElement('div');
     empty.className = 'tool-card__empty';
-    empty.textContent = msg.state === 'active' ? 'En curso…' : 'Sin salida';
+    empty.textContent = msg.state === 'active' ? t('En curso…') : t('Sin salida');
     body.appendChild(empty);
   }
   card.appendChild(body);

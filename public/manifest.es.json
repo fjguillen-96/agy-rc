@@ -1,14 +1,14 @@
 {
   "name": "Antigravity RC",
   "short_name": "agy-rc",
-  "description": "Chat remotely with the Antigravity CLI (agy) over Tailscale.",
+  "description": "Chatea de forma remota con el CLI Antigravity (agy) vía Tailscale.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#0b0f19",
   "theme_color": "#0b0f19",
-  "lang": "en",
+  "lang": "es",
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -37,9 +37,9 @@
   ],
   "shortcuts": [
     {
-      "name": "New chat",
+      "name": "Nuevo chat",
       "url": "/?newChat=1",
-      "description": "Start a new chat with Antigravity"
+      "description": "Crear un nuevo chat con Antigravity"
     }
   ]
 }

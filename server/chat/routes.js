@@ -343,7 +343,8 @@ export function createChatRouter(manager, deps = {}) {
         const text = await runCliCommand(cmd, cwd, deps.execImpl ? { execImpl: deps.execImpl } : undefined);
         message = { ...systemMessage('cli', text), cmd };
       } catch (err) {
-        message = systemMessage('error', `${cmd}: ${err && err.message ? err.message : 'falló'}`);
+        const reason = err && err.message ? err.message : '';
+        message = systemMessage('error', `${cmd}: ${reason || 'falló'}`, undefined, { key: 'sys.cliFailed', params: { cmd, message: reason } });
       }
       await runner.upsert(message);
       res.json({ messageId: message.id, kind: message.kind });

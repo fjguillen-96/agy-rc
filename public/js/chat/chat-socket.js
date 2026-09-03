@@ -195,7 +195,7 @@ function connectChatSimulated(chatId, handlers) {
 
   function stop() {
     handlers.onState && handlers.onState('idle');
-    handlers.onMsg && handlers.onMsg({ id: nextId('sys'), ts: Date.now(), role: 'system', text: 'Detenido', kind: 'stopped' });
+    handlers.onMsg && handlers.onMsg({ id: nextId('sys'), ts: Date.now(), role: 'system', key: 'sys.stopped', text: 'Detenido', kind: 'stopped' });
   }
 
   return {

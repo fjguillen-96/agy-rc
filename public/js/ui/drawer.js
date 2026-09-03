@@ -3,6 +3,7 @@
 // hace X, punto de estado; ⋯ → renombrar/borrar) con CTA "＋ Nuevo chat".
 
 import { icon } from './icons.js';
+import { t, getLang, toggleLang } from '../i18n.js';
 import { getProjectsRoot, relativeToRoot, splitDisplayPath } from './directory.js';
 
 const REFRESH_MS = 10000;
@@ -13,12 +14,12 @@ function timeAgo(iso) {
   if (Number.isNaN(then)) return null;
   const diffMs = Date.now() - then;
   const mins = Math.floor(diffMs / 60000);
-  if (mins < 1) return 'hace un momento';
-  if (mins < 60) return `hace ${mins} min`;
+  if (mins < 1) return t('hace un momento');
+  if (mins < 60) return t('hace {n} min', { n: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `hace ${hours} h`;
+  if (hours < 24) return t('hace {n} h', { n: hours });
   const days = Math.floor(hours / 24);
-  return `hace ${days} d`;
+  return t('hace {n} d', { n: days });
 }
 
 function closeCtxMenu() {
@@ -59,11 +60,12 @@ export function mount(root, backdrop, deps) {
     <div class="drawer__scroll">
       <div class="drawer__section">
         <div class="drawer__chats" id="drawer-chats"></div>
-        <button type="button" class="drawer__new-btn" id="drawer-new-chat-btn">＋ Nuevo chat</button>
+        <button type="button" class="drawer__new-btn" id="drawer-new-chat-btn">${t('＋ Nuevo chat')}</button>
       </div>
     </div>
     <div class="drawer__footer">
-      <button type="button" class="drawer__install-btn" id="drawer-install-btn" hidden>Instalar</button>
+      <button type="button" class="drawer__install-btn" id="drawer-install-btn" hidden>${t('Instalar')}</button>
+      <button type="button" class="drawer__lang-btn" id="drawer-lang-btn" title="${t('Cambiar idioma')}" aria-label="${t('Cambiar idioma')}">${getLang() === 'es' ? 'English' : 'Español'}</button>
       <div class="drawer__version" id="drawer-version"></div>
     </div>
   `;
@@ -74,6 +76,9 @@ export function mount(root, backdrop, deps) {
 
   root.querySelector('#drawer-new-chat-btn').addEventListener('click', () => {
     onOpenNewChat();
+  });
+  root.querySelector('#drawer-lang-btn').addEventListener('click', () => {
+    toggleLang();
   });
   installBtn.addEventListener('click', async () => {
     const { promptInstall } = await import('../pwa.js');
@@ -103,7 +108,7 @@ export function mount(root, backdrop, deps) {
       // §backend: /api/chats puede no existir todavía si el backend aún no está desplegado;
       // se degrada a "sin chats" sin romper el drawer (404) y solo avisa en otros errores.
       if (err && err.status !== 404 && err.name !== 'UnauthorizedError') {
-        toast(`No se pudieron cargar los chats: ${err.message}`, { type: 'error' });
+        toast(t('No se pudieron cargar los chats: {message}', { message: err.message }), { type: 'error' });
       }
       chats = [];
     }
@@ -119,7 +124,7 @@ export function mount(root, backdrop, deps) {
     if (chats.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'drawer__empty drawer__empty--chats';
-      empty.textContent = 'No hay chats todavía.';
+      empty.textContent = t('No hay chats todavía.');
       chatsEl.appendChild(empty);
       return;
     }
@@ -144,7 +149,7 @@ export function mount(root, backdrop, deps) {
 
     const nameRow = document.createElement('div');
     nameRow.className = 'chat-row__name';
-    nameRow.textContent = chat.title || '(sin título)';
+    nameRow.textContent = chat.title || t('(sin título)');
     main.appendChild(nameRow);
 
     const displayPath = relativeToRoot(chat.cwd || '', projectsRoot);
@@ -174,7 +179,7 @@ export function mount(root, backdrop, deps) {
     menuBtn.type = 'button';
     menuBtn.className = 'session-row__menu-btn';
     menuBtn.innerHTML = icon('kebab');
-    menuBtn.setAttribute('aria-label', 'Opciones del chat');
+    menuBtn.setAttribute('aria-label', t('Opciones del chat'));
     menuBtn.addEventListener('click', (ev) => {
       ev.stopPropagation();
       openChatRowMenu(menuBtn, chat);
@@ -197,10 +202,10 @@ export function mount(root, backdrop, deps) {
 
     const renameBtn = document.createElement('button');
     renameBtn.type = 'button';
-    renameBtn.textContent = 'Renombrar';
+    renameBtn.textContent = t('Renombrar');
     renameBtn.addEventListener('click', async () => {
       closeCtxMenu();
-      const next = window.prompt('Nuevo título del chat:', chat.title || '');
+      const next = window.prompt(t('Nuevo título del chat:'), chat.title || '');
       if (next === null || !next.trim() || next.trim() === chat.title) return;
       try {
         await api(`/chats/${encodeURIComponent(chat.id)}`, {
@@ -208,25 +213,25 @@ export function mount(root, backdrop, deps) {
           body: JSON.stringify({ title: next.trim() }),
         });
         await fetchChats();
-        toast('Chat renombrado', { type: 'success' });
+        toast(t('Chat renombrado'), { type: 'success' });
       } catch (err) {
-        toast(`No se pudo renombrar: ${err.message}`, { type: 'error' });
+        toast(t('No se pudo renombrar: {message}', { message: err.message }), { type: 'error' });
       }
     });
 
     const deleteBtn = document.createElement('button');
     deleteBtn.type = 'button';
     deleteBtn.className = 'danger';
-    deleteBtn.textContent = 'Borrar chat';
+    deleteBtn.textContent = t('Borrar chat');
     deleteBtn.addEventListener('click', async () => {
       closeCtxMenu();
-      if (!window.confirm(`¿Borrar el chat "${chat.title || chat.id}"?`)) return;
+      if (!window.confirm(t('¿Borrar el chat "{title}"?', { title: chat.title || chat.id }))) return;
       try {
         await api(`/chats/${encodeURIComponent(chat.id)}`, { method: 'DELETE' });
         await fetchChats();
-        toast('Chat borrado', { type: 'success' });
+        toast(t('Chat borrado'), { type: 'success' });
       } catch (err) {
-        toast(`No se pudo borrar: ${err.message}`, { type: 'error' });
+        toast(t('No se pudo borrar: {message}', { message: err.message }), { type: 'error' });
       }
     });
 

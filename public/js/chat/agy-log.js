@@ -7,6 +7,7 @@
 // (404/500/red), se avisa con toast y el sheet queda vacío en vez de romper.
 
 import { icon } from '../ui/icons.js';
+import { t } from '../i18n.js';
 
 const MAX_ENTRIES = 2000;
 const DELTA_MAX = 80;
@@ -61,7 +62,7 @@ function compactLine(entry) {
  *          chatId: string, controller: ReturnType<typeof import('./chat-socket.js').connectChat>|null}} opts
  */
 export function open({ sheets, api, toast, chatId, controller }) {
-  sheets.open('Registro de agy', (body, close) => {
+  sheets.open(t('Registro de agy'), (body, close) => {
     void close; // el cierre real se detecta por MutationObserver (ver abajo)
 
     const sheetRoot = body.closest('.sheet');
@@ -83,12 +84,12 @@ export function open({ sheets, api, toast, chatId, controller }) {
     const compactBtn = document.createElement('button');
     compactBtn.type = 'button';
     compactBtn.className = 'segmented__opt';
-    compactBtn.textContent = 'Compacto';
+    compactBtn.textContent = t('Compacto');
     compactBtn.dataset.active = 'true';
     const rawBtn = document.createElement('button');
     rawBtn.type = 'button';
     rawBtn.className = 'segmented__opt';
-    rawBtn.textContent = 'Crudo';
+    rawBtn.textContent = t('Crudo');
     seg.appendChild(compactBtn);
     seg.appendChild(rawBtn);
     toolbar.appendChild(seg);
@@ -96,7 +97,7 @@ export function open({ sheets, api, toast, chatId, controller }) {
     const clearBtn = document.createElement('button');
     clearBtn.type = 'button';
     clearBtn.className = 'btn agy-log__clear-btn';
-    clearBtn.textContent = 'Limpiar vista';
+    clearBtn.textContent = t('Limpiar vista');
     toolbar.appendChild(clearBtn);
 
     const listWrap = document.createElement('div');
@@ -171,15 +172,15 @@ export function open({ sheets, api, toast, chatId, controller }) {
     });
 
     async function loadInitial() {
-      listWrap.innerHTML = '<div class="sheet__loading">Cargando…</div>';
+      listWrap.innerHTML = `<div class="sheet__loading">${t('Cargando…')}</div>`;
       try {
         const res = await api(`/chats/${encodeURIComponent(chatId)}/log?limit=500`);
         const list = res && Array.isArray(res.entries) ? res.entries : [];
         entries = list.slice(-MAX_ENTRIES);
         renderAllLines();
       } catch (err) {
-        listWrap.innerHTML = '<p class="sheet__hint">No se pudo cargar el registro.</p>';
-        toast(`No se pudo cargar el registro de agy: ${err.message}`, { type: 'error' });
+        listWrap.innerHTML = `<p class="sheet__hint">${t('No se pudo cargar el registro.')}</p>`;
+        toast(t('No se pudo cargar el registro de agy: {message}', { message: err.message }), { type: 'error' });
       }
     }
 

@@ -2,6 +2,8 @@
 // Registro del service worker (solo en contexto seguro), captura de
 // beforeinstallprompt y aviso discreto cuando no hay HTTPS.
 
+import { t } from './i18n.js';
+
 const INSECURE_DISMISS_KEY = 'agyrc.insecureBannerDismissed';
 
 let deferredInstallPrompt = null;
@@ -40,8 +42,8 @@ function showInsecureBanner() {
   const banner = document.createElement('div');
   banner.className = 'insecure-banner';
   banner.innerHTML = `
-    <span>Para instalar la app hace falta HTTPS: usa <code>tailscale serve</code> (ver README).</span>
-    <button type="button" aria-label="Cerrar aviso">✕</button>
+    <span>${t('Para instalar la app hace falta HTTPS: usa {cmd} (ver README).', { cmd: '<code>tailscale serve</code>' })}</span>
+    <button type="button" aria-label="${t('Cerrar aviso')}">✕</button>
   `;
   banner.querySelector('button').addEventListener('click', () => {
     banner.remove();

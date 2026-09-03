@@ -89,14 +89,27 @@ export function summarizeTool(name, params) {
   }
 }
 
-export function systemMessage(kind, text, id) {
-  return {
+/**
+ * Mensaje system. `text` es el texto en español (se persiste tal cual); `key`/`params` permiten a
+ * la PWA mostrarlo en su idioma (public/js/i18n.js, systemText()).
+ * @param {string} kind info|error|stopped|cli
+ * @param {string} text
+ * @param {string} [id]
+ * @param {{key: string, params?: object}} [i18n]
+ */
+export function systemMessage(kind, text, id, i18n) {
+  const msg = {
     id: id || `s-${Date.now().toString(36)}-${crypto.randomBytes(3).toString('hex')}`,
     ts: Date.now(),
     role: 'system',
     text,
     kind,
   };
+  if (i18n && i18n.key) {
+    msg.key = i18n.key;
+    if (i18n.params) msg.params = i18n.params;
+  }
+  return msg;
 }
 
 /**
@@ -609,7 +622,7 @@ export class ChatRunner extends EventEmitter {
       console.error(`[chat:${this.chat.id}] error escribiendo a stdin:`, err);
       if (this.proc === proc) {
         this.turnActive = false;
-        await this.upsert(systemMessage('error', `No se pudo enviar el mensaje a Antigravity: ${err.message}`));
+        await this.upsert(systemMessage('error', `No se pudo enviar el mensaje a Antigravity: ${err.message}`, undefined, { key: 'sys.sendFailed', params: { message: err.message } }));
         this.setState('idle');
         this.killProcess();
       }
@@ -633,7 +646,7 @@ export class ChatRunner extends EventEmitter {
     this.stoppedByUser = true;
     await this.closeOpenAssistants({ interrupted: true });
     this.turnActive = false;
-    await this.upsert(systemMessage('stopped', 'Detenido'));
+    await this.upsert(systemMessage('stopped', 'Detenido', undefined, { key: 'sys.stopped' }));
     this.setState('idle');
     this.rawLog('sys', 'kill (detener)');
     this.killProcess();
@@ -718,7 +731,9 @@ export class ChatRunner extends EventEmitter {
         this.upsert(
           systemMessage(
             'error',
-            'Antigravity denegó un permiso porque el auto-aprobado está desactivado. Activa "Auto-aprobar herramientas" en los ajustes del chat, o usa el modo Plan para revisar antes de ejecutar.'
+            'Antigravity denegó un permiso porque el auto-aprobado está desactivado. Activa "Auto-aprobar herramientas" en los ajustes del chat, o usa el modo Plan para revisar antes de ejecutar.',
+            undefined,
+            { key: 'sys.permissionDenied' }
           )
         ).catch((err) => console.error(`[chat:${this.chat.id}] error persistiendo aviso de permiso:`, err))
       );
@@ -747,7 +762,18 @@ export class ChatRunner extends EventEmitter {
       this.setState('running');
     }
     const cwd = (evt.init && evt.init.cwd) || this.chat.cwd;
-    await this.upsert(systemMessage('info', this.buildInitInfoText(cwd), `sys-init-${Date.now()}`));
+    await this.upsert(
+      systemMessage('info', this.buildInitInfoText(cwd), `sys-init-${Date.now()}`, {
+        key: this.resumed ? 'sys.init.resumed' : 'sys.init',
+        params: {
+          cwd,
+          autoApprove: this.chat.autoApprove ? 'ON' : 'OFF',
+          model: this.spawnedModel || this.chat.model || '',
+          effort: this.chat.effort || '',
+          mode: this.chat.mode || 'normal',
+        },
+      })
+    );
   }
 
   /**
@@ -891,7 +917,11 @@ export class ChatRunner extends EventEmitter {
       const isCancellation = this.stoppedByUser || this.restarting ||
         (result.error && (result.error.includes('context canceled') || result.error.includes('stream input cancelled')));
       if (!isCancellation) {
-        await this.upsert(systemMessage('error', result.error || 'Error en el turno de Antigravity'));
+        await this.upsert(
+          result.error
+            ? systemMessage('error', result.error)
+            : systemMessage('error', 'Error en el turno de Antigravity', undefined, { key: 'sys.turnError' })
+        );
       }
     }
     this.restarting = false;
@@ -935,7 +965,8 @@ export class ChatRunner extends EventEmitter {
       try {
         await this.closeOpenAssistants({ interrupted: true });
         if (wasTurnActive && !stoppedByUser) {
-          await this.upsert(systemMessage('error', `Antigravity terminó (código ${code === null ? '?' : code})`));
+          const codeText = code === null ? '?' : String(code);
+          await this.upsert(systemMessage('error', `Antigravity terminó (código ${codeText})`, undefined, { key: 'sys.exit', params: { code: codeText } }));
         }
         this.setState('idle');
         if (this.chat.proc) await this.persistChat({ proc: null });

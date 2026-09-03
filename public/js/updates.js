@@ -5,6 +5,8 @@
 // plano y cada 10 min. Al detectarla: banner "Nueva versión disponible"; si no hay texto sin
 // enviar, se actualiza sola en unos segundos. La recarga no pierde nada (todo vive en el servidor).
 
+import { t } from './i18n.js';
+
 const CHECK_INTERVAL_MS = 10 * 60 * 1000;
 const AUTO_APPLY_DELAY_MS = 4000;
 const MIN_GAP_MS = 5000; // no machacar /api/health si varios WS reconectan a la vez
@@ -51,7 +53,7 @@ export function initUpdates({ api, isBusy }) {
 }
 
 async function applyUpdate() {
-  if (banner) banner.querySelector('.update-banner__text').textContent = 'Actualizando…';
+  if (banner) banner.querySelector('.update-banner__text').textContent = t('Actualizando…');
   try {
     // Con SW (HTTPS): forzar la comprobación del sw.js nuevo; su install hace skipWaiting y
     // clients.claim, así que tras update() ya controla la página y la recarga trae lo nuevo.
@@ -70,9 +72,9 @@ function showBanner(isBusy) {
   banner.className = 'update-banner';
   banner.setAttribute('role', 'status');
   banner.innerHTML = `
-    <span class="update-banner__text">Nueva versión disponible</span>
-    <button type="button" class="update-banner__later" aria-label="Más tarde">Más tarde</button>
-    <button type="button" class="update-banner__apply">Actualizar</button>
+    <span class="update-banner__text">${t('Nueva versión disponible')}</span>
+    <button type="button" class="update-banner__later" aria-label="${t('Más tarde')}">${t('Más tarde')}</button>
+    <button type="button" class="update-banner__apply">${t('Actualizar')}</button>
   `;
   banner.querySelector('.update-banner__apply').addEventListener('click', () => {
     clearTimeout(autoTimer);
@@ -90,14 +92,14 @@ function showBanner(isBusy) {
     autoTimer = setTimeout(() => {
       if (!banner) return;
       if (isBusy()) {
-        banner.querySelector('.update-banner__text').textContent = 'Nueva versión disponible · toca Actualizar cuando termines';
+        banner.querySelector('.update-banner__text').textContent = t('Nueva versión disponible · toca Actualizar cuando termines');
         return; // el usuario tiene texto sin enviar: no le pisamos la recarga
       }
       applyUpdate();
     }, AUTO_APPLY_DELAY_MS);
   };
   if (!isBusy()) {
-    banner.querySelector('.update-banner__text').textContent = 'Nueva versión disponible · actualizando en unos segundos';
+    banner.querySelector('.update-banner__text').textContent = t('Nueva versión disponible · actualizando en unos segundos');
   }
   scheduleAuto();
 }

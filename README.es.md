@@ -6,8 +6,22 @@
 
 **agy-rc** es una Progressive Web App (PWA) móvil autohospedada para chatear con el CLI **Antigravity** (`agy`) alojado en un servidor o Mini PC Linux a través de la red segura de **Tailscale**.
 
+<p align="center">
+  <img src="docs/screenshots/demo.gif" alt="Demo de agy-rc: un turno completo de Antigravity desde el móvil — comando, tarjetas de herramienta y respuesta en streaming" width="300" />
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/01-chat.png" alt="Chat con respuesta en streaming" width="19%" />
+  <img src="docs/screenshots/02-tools.png" alt="Tarjetas de herramienta con salida desplegada" width="19%" />
+  <img src="docs/screenshots/03-commands.png" alt="Menú de comandos /" width="19%" />
+  <img src="docs/screenshots/04-drawer.png" alt="Drawer con la lista de chats" width="19%" />
+  <img src="docs/screenshots/05-new-chat.png" alt="Hoja de nuevo chat con selector de carpeta" width="19%" />
+</p>
+
 > [!NOTE]
 > **Solución provisional de la comunidad**: Este proyecto nace como una solución comunitaria de código abierto para disfrutar desde hoy de una experiencia remota táctil en el móvil con Google Antigravity, hasta que Google DeepMind lance de forma oficial su propio control remoto de Antigravity para dispositivos móviles.
+
+> La interfaz está disponible en **español e inglés** (se detecta del navegador; se cambia desde el menú lateral).
 
 Proporciona una interfaz de chat táctil cuidada, al estilo de Claude Code Remote Control: burbujas,
 texto en streaming, tarjetas de herramientas, botones de acción rápida y selector visual de proyectos.

@@ -873,6 +873,20 @@ button {
   padding: 0 10px;
 }
 
+.drawer__lang-btn {
+  height: 36px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-raised-2);
+  color: var(--text-dim);
+  font-size: 12px;
+  padding: 0 10px;
+}
+
+.drawer__lang-btn:active {
+  filter: brightness(1.15);
+}
+
 /* ---------- Context menu (⋯ de fila / sesión) ---------- */
 
 .ctx-menu {

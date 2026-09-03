@@ -21,7 +21,19 @@
 </p>
 
 > [!NOTE]
-> The app's user interface and the installer output are currently **Spanish only**; this README is the English entry point. Contributions adding other UI languages are welcome.
+> The app UI is available in **English and Spanish** (auto-detected from the browser; switch it from the side menu). The installer output and agy's own messages are in Spanish. Contributions adding other UI languages are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+<p align="center">
+  <img src="docs/screenshots/demo.gif" alt="agy-rc demo: a full Antigravity turn from the phone — command, tool cards and streamed answer" width="300" />
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/01-chat.png" alt="Chat with streamed answer" width="19%" />
+  <img src="docs/screenshots/02-tools.png" alt="Tool cards with expanded output" width="19%" />
+  <img src="docs/screenshots/03-commands.png" alt="Slash command menu" width="19%" />
+  <img src="docs/screenshots/04-drawer.png" alt="Chat list drawer" width="19%" />
+  <img src="docs/screenshots/05-new-chat.png" alt="New chat sheet with folder picker" width="19%" />
+</p>
 
 > [!NOTE]
 > **Provisional Community Solution**: This project is an open-source community bridge built to provide a mobile-first remote control experience for Google Antigravity today, until Google DeepMind releases an official mobile remote control companion for Antigravity.
@@ -190,7 +202,7 @@ App-level commands are also available: `/modelo` (`/model`), `/esfuerzo` (`/effo
 * **`agy` not found:** make sure the CLI is in `PATH` (`~/.local/bin` is added automatically by the scripts) or set `AGY_CMD` to its absolute path in `.env`.
 * **The PWA does not offer "Install":** you need HTTPS with a valid certificate. Run `./scripts/tailscale-https.sh` and open the `https://<host>.<tailnet>.ts.net` URL.
 * **macOS / no systemd:** the installer skips the service. Start the server in the foreground with `./scripts/start.sh` (or `npm start`).
-* **A chat stays "busy":** open the chat menu → *Registro de agy* to see the raw process output, or *Detener* to kill the process; the conversation resumes on the next message.
+* **A chat stays "busy":** open the chat menu → *agy log (CLI)* to see the raw process output, or the *Stop* button to kill the process; the conversation resumes on the next message.
 
 ---
 

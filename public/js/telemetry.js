@@ -3,6 +3,8 @@
 // arranque (tiempo de carga + user agent) se envían al servidor, que los escribe en su
 // journal. Permite depurar el móvil (iOS Safari) sin acceso a sus devtools.
 
+import { getToken } from './api.js';
+
 const ENDPOINT = '/api/client-log';
 let sent = 0;
 
@@ -11,11 +13,14 @@ export function post(payload) {
   sent += 1;
   try {
     const body = JSON.stringify({ ...payload, url: location.pathname + location.search });
-    if (navigator.sendBeacon) {
-      navigator.sendBeacon(ENDPOINT, new Blob([body], { type: 'application/json' }));
-    } else {
-      fetch(ENDPOINT, { method: 'POST', headers: { 'content-type': 'application/json' }, body, keepalive: true }).catch(() => {});
-    }
+    // fetch (no sendBeacon): sendBeacon no puede mandar Authorization y daba 401 con AGY_TOKEN.
+    const token = getToken();
+    fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body,
+      keepalive: true,
+    }).catch(() => {});
   } catch {
     // nunca debe romper la app
   }

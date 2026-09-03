@@ -2,6 +2,7 @@
 // Bootstrap: conecta store ⇄ chat ⇄ ui. Punto de entrada único de la app (vista única: chat).
 
 import { api, chatWsUrl, getToken, setToken, UnauthorizedError } from './api.js';
+import { t } from './i18n.js';
 import { store } from './store.js';
 import { initPwa } from './pwa.js';
 import { initUpdates } from './updates.js';
@@ -37,11 +38,11 @@ function showTokenDialog({ message } = {}) {
     box.className = 'token-dialog__box';
 
     const h2 = document.createElement('h2');
-    h2.textContent = 'Token de acceso';
+    h2.textContent = t('Token de acceso');
     box.appendChild(h2);
 
     const p = document.createElement('p');
-    p.textContent = message || 'Este servidor requiere un token para autenticarse.';
+    p.textContent = message || t('Este servidor requiere un token para autenticarse.');
     box.appendChild(p);
 
     const field = document.createElement('div');
@@ -50,7 +51,7 @@ function showTokenDialog({ message } = {}) {
     input.type = 'password';
     input.autocomplete = 'off';
     input.value = getToken();
-    input.placeholder = 'Token';
+    input.placeholder = t('Token');
     field.appendChild(input);
     box.appendChild(field);
 
@@ -59,11 +60,11 @@ function showTokenDialog({ message } = {}) {
     const cancelBtn = document.createElement('button');
     cancelBtn.type = 'button';
     cancelBtn.className = 'btn';
-    cancelBtn.textContent = 'Cancelar';
+    cancelBtn.textContent = t('Cancelar');
     const saveBtn = document.createElement('button');
     saveBtn.type = 'button';
     saveBtn.className = 'btn btn--primary';
-    saveBtn.textContent = 'Guardar';
+    saveBtn.textContent = t('Guardar');
     actions.appendChild(cancelBtn);
     actions.appendChild(saveBtn);
     box.appendChild(actions);
@@ -93,7 +94,7 @@ async function withAuthRetry(fn) {
       return await fn();
     } catch (err) {
       if (err instanceof UnauthorizedError) {
-        const token = await showTokenDialog({ message: 'El token no es válido o hace falta uno nuevo.' });
+        const token = await showTokenDialog({ message: t('El token no es válido o hace falta uno nuevo.') });
         if (token === null) throw err;
         setToken(token);
         continue;
@@ -163,14 +164,14 @@ async function attachChat(id) {
   } catch (err) {
     if (seq !== currentAttachSeq) return;
     if (err && err.status === 404) {
-      toast('Ese chat ya no existe', { type: 'error' });
+      toast(t('Ese chat ya no existe'), { type: 'error' });
       store.setActiveChatId(null);
       currentChatId = null;
       showChatEmpty(true);
       return;
     }
     if (err.name !== 'UnauthorizedError') {
-      toast(`No se pudo abrir el chat: ${err.message}`, { type: 'error' });
+      toast(t('No se pudo abrir el chat: {message}', { message: err.message }), { type: 'error' });
     }
   }
 
@@ -194,16 +195,16 @@ async function attachChat(id) {
       chatDockCtl.setChat(chat);
       updateChatInList(chat);
     },
-    onError: (message) => toast(message || 'Error del chat', { type: 'error' }),
+    onError: (message) => toast(message || t('Error del chat'), { type: 'error' }),
     onGone: () => {
-      toast('Ese chat ya no existe', { type: 'error' });
+      toast(t('Ese chat ya no existe'), { type: 'error' });
       store.setActiveChatId(null);
       currentChatId = null;
       showChatEmpty(true);
       drawerCtl.refreshChats();
     },
     onUnauthorized: async () => {
-      const token = await showTokenDialog({ message: 'El token no es válido para conectar por WebSocket.' });
+      const token = await showTokenDialog({ message: t('El token no es válido para conectar por WebSocket.') });
       if (token !== null) {
         setToken(token);
         attachChat(id);
@@ -215,14 +216,14 @@ async function attachChat(id) {
 
 function sendChatText(text, attachments) {
   if (!currentChatController) {
-    toast('No hay ningún chat abierto', { type: 'error' });
+    toast(t('No hay ningún chat abierto'), { type: 'error' });
     return;
   }
   const result = currentChatController.send(text, attachments);
   if (result.queued) {
     const msg = result.reason === 'offline'
-      ? 'Sin conexión: se enviará al reconectar'
-      : 'En cola: se enviará cuando termine el turno actual';
+      ? t('Sin conexión: se enviará al reconectar')
+      : t('En cola: se enviará cuando termine el turno actual');
     toast(msg, { type: 'info' });
   }
 }
@@ -233,7 +234,7 @@ function stopChat() {
 }
 
 async function patchChat(patch) {
-  if (!currentChatId) throw new Error('No hay chat activo');
+  if (!currentChatId) throw new Error(t('No hay chat activo'));
   const updated = await apiWithAuth(`/chats/${encodeURIComponent(currentChatId)}`, {
     method: 'PATCH',
     body: JSON.stringify(patch),
@@ -252,13 +253,13 @@ async function refreshChats() {
     if (err && err.status === 404) {
       if (!chatBackendWarned) {
         chatBackendWarned = true;
-        toast('Backend de chat no disponible todavía', { type: 'info' });
+        toast(t('Backend de chat no disponible todavía'), { type: 'info' });
       }
       store.setChats([]);
       return [];
     }
     if (err.name !== 'UnauthorizedError') {
-      toast(`No se pudieron cargar los chats: ${err.message}`, { type: 'error' });
+      toast(t('No se pudieron cargar los chats: {message}', { message: err.message }), { type: 'error' });
     }
     store.setChats([]);
     return [];
@@ -320,7 +321,7 @@ const chatTopbarCtl = chatTopbarUi.mount(document.getElementById('chat-topbar'),
   onThinkingMode: (mode) => chatViewCtl.setThinkingMode(mode),
   onOpenLog: () => {
     if (!currentChatId) {
-      toast('No hay ningún chat abierto', { type: 'error' });
+      toast(t('No hay ningún chat abierto'), { type: 'error' });
       return;
     }
     agyLogUi.open({
@@ -351,26 +352,26 @@ const chatDockCtl = chatDockUi.mount(
     // como mensaje de sistema kind 'cli'
     onCommand: async (cmd) => {
       if (!currentChatId) {
-        toast('No hay ningún chat abierto', { type: 'error' });
+        toast(t('No hay ningún chat abierto'), { type: 'error' });
         return;
       }
-      toast(`Ejecutando ${cmd}…`, { type: 'info' });
+      toast(t('Ejecutando {cmd}…', { cmd }), { type: 'info' });
       await apiWithAuth(`/chats/${encodeURIComponent(currentChatId)}/command`, { method: 'POST', body: JSON.stringify({ cmd }) });
     },
     // acciones de la app que también se ofrecen en el menú "/" del compositor
     commands: [
       {
-        cmd: '/nueva', label: 'Nueva conversación', desc: 'Empieza otro chat en el mismo proyecto', icon: 'plus',
+        cmd: '/nueva', label: t('Nueva conversación'), desc: t('Empieza otro chat en el mismo proyecto'), icon: 'plus',
         run: () => {
           const active = store.getActiveChat();
           newChatCtl.open({ cwd: active ? active.cwd : undefined });
         },
       },
       {
-        cmd: '/registro', label: 'Registro de agy (CLI)', desc: 'Salida cruda del proceso agy de este chat', icon: 'file',
+        cmd: '/registro', label: t('Registro de agy (CLI)'), desc: t('Salida cruda del proceso agy de este chat'), icon: 'file',
         run: () => {
           if (!currentChatId) {
-            toast('No hay ningún chat abierto', { type: 'error' });
+            toast(t('No hay ningún chat abierto'), { type: 'error' });
             return;
           }
           agyLogUi.open({ sheets: sheetsCtl, api: apiWithAuth, toast, chatId: currentChatId, controller: currentChatController });
@@ -380,7 +381,13 @@ const chatDockCtl = chatDockUi.mount(
   },
 );
 
-document.getElementById('chat-empty-new-btn').addEventListener('click', () => newChatCtl.open());
+const chatEmptyTextEl = document.querySelector('#chat-empty p');
+if (chatEmptyTextEl) chatEmptyTextEl.textContent = t('No hay ningún chat abierto.');
+const chatEmptyNewBtn = document.getElementById('chat-empty-new-btn');
+if (chatEmptyNewBtn) {
+  chatEmptyNewBtn.textContent = t('＋ Nuevo chat');
+  chatEmptyNewBtn.addEventListener('click', () => newChatCtl.open());
+}
 
 // ---------- Boot ----------
 

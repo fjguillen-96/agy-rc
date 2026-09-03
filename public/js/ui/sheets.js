@@ -3,6 +3,7 @@
 // Lo usan controls.js (modelo / esfuerzo / modo / comandos) y composer.js (historial).
 
 import { icon } from './icons.js';
+import { t } from '../i18n.js';
 
 /**
  * @param {HTMLElement} root #sheet
@@ -15,7 +16,7 @@ export function mount(root, backdrop) {
     <div class="sheet__handle"></div>
     <div class="sheet__header">
       <h2 id="sheet-title"></h2>
-      <button type="button" class="sheet__close" aria-label="Cerrar">${icon('close')}</button>
+      <button type="button" class="sheet__close" aria-label="${t('Cerrar')}">${icon('close')}</button>
     </div>
     <div class="sheet__body" id="sheet-body"></div>
   `;

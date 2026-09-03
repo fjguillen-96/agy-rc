@@ -2,6 +2,8 @@
 // Helpers de rutas (relativas a projectsRoot) y el mini-formulario "Nueva carpeta"
 // reutilizados por chat-topbar.js, drawer.js y new-chat.js.
 
+import { t } from '../i18n.js';
+
 let projectsRootPromise = null;
 
 /**
@@ -83,17 +85,17 @@ export function buildNewFolderForm(opts) {
   const wrap = document.createElement('div');
   wrap.className = 'new-folder-form';
   wrap.innerHTML = `
-    <input type="text" class="new-folder-form__input" placeholder="nombre-del-proyecto"
+    <input type="text" class="new-folder-form__input" placeholder="${t('nombre-del-proyecto')}"
       autocomplete="off" autocapitalize="off" spellcheck="false">
     <div class="new-folder-form__git">
-      <span>Inicializar repositorio git</span>
+      <span>${t('Inicializar repositorio git')}</span>
       <button type="button" class="toggle" data-on="true" role="switch" aria-checked="true">
         <span class="toggle__knob"></span>
       </button>
     </div>
     <div class="prompt-actions">
-      <button type="button" class="btn" data-action="cancel">Cancelar</button>
-      <button type="button" class="btn btn--primary" data-action="create">Crear</button>
+      <button type="button" class="btn" data-action="cancel">${t('Cancelar')}</button>
+      <button type="button" class="btn btn--primary" data-action="create">${t('Crear')}</button>
     </div>
   `;
 
@@ -112,7 +114,7 @@ export function buildNewFolderForm(opts) {
   async function submit() {
     const name = input.value.trim();
     if (!name) {
-      toast('Ponle un nombre a la carpeta', { type: 'error' });
+      toast(t('Ponle un nombre a la carpeta'), { type: 'error' });
       return;
     }
     createBtn.disabled = true;
@@ -122,10 +124,10 @@ export function buildNewFolderForm(opts) {
         method: 'POST',
         body: JSON.stringify({ parent: parent || '', name, git: gitOn }),
       });
-      toast('Carpeta creada', { type: 'success' });
+      toast(t('Carpeta creada'), { type: 'success' });
       onCreated(created.path);
     } catch (err) {
-      toast(err.message || 'No se pudo crear la carpeta', { type: 'error' });
+      toast(err.message || t('No se pudo crear la carpeta'), { type: 'error' });
       createBtn.disabled = false;
       cancelBtn.disabled = false;
     }

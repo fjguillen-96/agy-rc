@@ -1,0 +1,35 @@
+name: Bug report
+description: Something is not working as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Describe the bug and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open a chat in ...
+        2. Send ...
+        3. See ...
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: OS, `node -v`, `tmux -V`, `agy --version`, phone + browser
+      placeholder: "CachyOS, Node 22.4, tmux 3.5a, agy 1.1.24, Android 15 / Chrome 130"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Server log
+      description: "`journalctl --user -u agy-rc -n 50` (or the terminal output). Remove tokens and personal paths."
+      render: shell

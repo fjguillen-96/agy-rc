@@ -7,6 +7,7 @@ import { renderMarkdown } from './markdown.js';
 import { renderToolCard, updateToolCard } from './tool-card.js';
 import { icon } from '../ui/icons.js';
 import { getToken } from '../api.js';
+import { t, locale, systemText } from '../i18n.js';
 
 const NEAR_BOTTOM_PX = 80;
 const THINKING_KEY = 'agyrc.thinking';
@@ -16,14 +17,14 @@ function formatTime(ts) {
   try {
     const d = new Date(ts);
     if (Number.isNaN(d.getTime())) return '';
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
   } catch {
     return '';
   }
 }
 
 function truncateFileName(name, max = 22) {
-  const n = String(name || 'archivo');
+  const n = String(name || t('archivo'));
   if (n.length <= max) return n;
   const dot = n.lastIndexOf('.');
   const ext = dot > 0 ? n.slice(dot) : '';
@@ -71,7 +72,7 @@ function attachmentsRow(list) {
       btn.className = 'msg-attachments__img-btn';
       const img = document.createElement('img');
       img.loading = 'lazy';
-      img.alt = a.name || 'adjunto';
+      img.alt = a.name || t('adjunto');
       btn.appendChild(img);
       btn.addEventListener('click', () => { if (fullUrl) window.open(fullUrl, '_blank', 'noopener'); });
       row.appendChild(btn);
@@ -120,7 +121,7 @@ export function mount(root) {
     <div class="chat-list" id="chat-list"></div>
     <div class="chat-thinking" id="chat-thinking" hidden>
       <span class="chat-thinking__dots"><span></span><span></span><span></span></span>
-      <span class="chat-thinking__label">Antigravity está pensando…</span>
+      <span class="chat-thinking__label">${t('Antigravity está pensando…')}</span>
     </div>
   `;
   const listEl = root.querySelector('#chat-list');
@@ -131,7 +132,7 @@ export function mount(root) {
   jumpBtn.type = 'button';
   jumpBtn.className = 'chat-jump-btn';
   jumpBtn.hidden = true;
-  jumpBtn.innerHTML = `${icon('arrowDownKey')}<span>nuevos mensajes</span>`;
+  jumpBtn.innerHTML = `${icon('arrowDownKey')}<span>${t('nuevos mensajes')}</span>`;
   root.parentElement ? root.parentElement.appendChild(jumpBtn) : root.appendChild(jumpBtn);
 
   let messages = [];
@@ -171,7 +172,7 @@ export function mount(root) {
     details.open = isOpen;
 
     const summary = document.createElement('summary');
-    summary.innerHTML = `${icon('spark')}<span>Razonamiento</span>`;
+    summary.innerHTML = `${icon('spark')}<span>${t('Razonamiento')}</span>`;
     details.appendChild(summary);
 
     const bodyDiv = document.createElement('div');
@@ -228,7 +229,7 @@ export function mount(root) {
       if (msg.interrupted) {
         const note = document.createElement('div');
         note.className = 'msg-assistant__note';
-        note.textContent = 'Detenido';
+        note.textContent = t('Detenido');
         body.appendChild(note);
       }
       body.title = formatTime(msg.ts);
@@ -265,7 +266,7 @@ export function mount(root) {
     el.className = 'msg-row msg-row--system';
     const span = document.createElement('span');
     span.className = `msg-system msg-system--${msg.kind || 'info'}`;
-    span.textContent = msg.text || '';
+    span.textContent = systemText(msg);
     el.appendChild(span);
     return el;
   }
@@ -331,7 +332,7 @@ export function mount(root) {
     const showRunningNoText = chatState === 'running' && (!last || last.role !== 'assistant' || (!last.text && !last.done));
     const show = showStarting || (showRunningNoText && !lastOpenAssistant) || (lastOpenAssistant && !last.text);
     thinkingEl.hidden = !show;
-    thinkingLabel.textContent = showStarting ? 'Iniciando Antigravity…' : 'Antigravity está pensando…';
+    thinkingLabel.textContent = showStarting ? t('Iniciando Antigravity…') : t('Antigravity está pensando…');
     if (show) scrollToBottom(false);
   }
 

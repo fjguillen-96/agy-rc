@@ -118,23 +118,24 @@ export function parseAgyStatus(screen) {
 //  - kind 'prompt': agy los expande dentro del turno (van tal cual en el texto del mensaje).
 //  - kind 'cli': "answered by the CLI itself" → no funcionan por stdin en stream-json, pero sí como
 //    invocación propia `agy --print=/cmd`; su salida se muestra en el chat como mensaje de sistema.
+//  `desc` es el texto en español y `descEn` en inglés (la PWA elige según su idioma).
 //  Los demás (/context, /diff, /rewind, /resume, /fork, /clear, /btw, /codesearch, /config…) abren
 //  paneles del TUI y agy los rechaza en modo print, así que no se ofrecen.
 
 export const CHAT_COMMANDS = [
-  { cmd: '/plan', kind: 'prompt', desc: 'Planifica con cuidado antes de ejecutar la tarea' },
-  { cmd: '/goal', kind: 'prompt', desc: 'Sigue trabajando hasta terminar por completo el objetivo' },
-  { cmd: '/grill-me', kind: 'prompt', desc: 'Te entrevista para alinear el plan antes de empezar' },
-  { cmd: '/browser', kind: 'prompt', desc: 'Agente de navegador para tareas web' },
-  { cmd: '/boost', kind: 'prompt', desc: 'Orquestador multiagente Boost para tareas complejas' },
-  { cmd: '/teamwork-preview', kind: 'prompt', desc: 'Equipo de agentes autónomos para proyectos grandes' },
-  { cmd: '/learn', kind: 'prompt', desc: 'Reflexiona sobre aciertos/correcciones y propone skills o reglas' },
-  { cmd: '/schedule', kind: 'prompt', desc: 'Ejecuta una instrucción con temporizador o de forma recurrente' },
-  { cmd: '/usage', kind: 'cli', desc: 'Cuota restante de los modelos (5 h y semanal)' },
-  { cmd: '/credits', kind: 'cli', desc: 'Créditos G1 restantes' },
-  { cmd: '/skills', kind: 'cli', desc: 'Lista las skills disponibles' },
-  { cmd: '/agents', kind: 'cli', desc: 'Lista los agentes personalizados' },
-  { cmd: '/changelog', kind: 'cli', desc: 'Novedades de la versión de agy' },
+  { cmd: '/plan', kind: 'prompt', desc: 'Planifica con cuidado antes de ejecutar la tarea', descEn: 'Plan carefully before executing the task' },
+  { cmd: '/goal', kind: 'prompt', desc: 'Sigue trabajando hasta terminar por completo el objetivo', descEn: 'Keep working until the goal is fully complete' },
+  { cmd: '/grill-me', kind: 'prompt', desc: 'Te entrevista para alinear el plan antes de empezar', descEn: 'Interviews you to align the plan before starting' },
+  { cmd: '/browser', kind: 'prompt', desc: 'Agente de navegador para tareas web', descEn: 'Browser agent for web tasks' },
+  { cmd: '/boost', kind: 'prompt', desc: 'Orquestador multiagente Boost para tareas complejas', descEn: 'Boost multi-agent orchestrator for complex tasks' },
+  { cmd: '/teamwork-preview', kind: 'prompt', desc: 'Equipo de agentes autónomos para proyectos grandes', descEn: 'Team of autonomous agents for large projects' },
+  { cmd: '/learn', kind: 'prompt', desc: 'Reflexiona sobre aciertos/correcciones y propone skills o reglas', descEn: 'Reflects on successes/corrections and proposes skills or rules' },
+  { cmd: '/schedule', kind: 'prompt', desc: 'Ejecuta una instrucción con temporizador o de forma recurrente', descEn: 'Runs an instruction on a timer or on a schedule' },
+  { cmd: '/usage', kind: 'cli', desc: 'Cuota restante de los modelos (5 h y semanal)', descEn: 'Remaining model quota (5 h and weekly)' },
+  { cmd: '/credits', kind: 'cli', desc: 'Créditos G1 restantes', descEn: 'Remaining G1 credits' },
+  { cmd: '/skills', kind: 'cli', desc: 'Lista las skills disponibles', descEn: 'Lists the available skills' },
+  { cmd: '/agents', kind: 'cli', desc: 'Lista los agentes personalizados', descEn: 'Lists the custom agents' },
+  { cmd: '/changelog', kind: 'cli', desc: 'Novedades de la versión de agy', descEn: 'What\'s new in this agy version' },
 ];
 
 const CLI_COMMAND_SET = new Set(CHAT_COMMANDS.filter((c) => c.kind === 'cli').map((c) => c.cmd));

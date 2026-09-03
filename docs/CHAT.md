@@ -189,6 +189,13 @@ para ahorrar datos móviles).
   modo Plan o si quieres revisar."), toggle Nuevo proyecto de Antigravity. Botón secundario **Reanudar
   conversación anterior…** → lista de `/api/agy/conversations` (título, carpeta, fecha) → crea chat con `conversationId`.
 - Reconexión WS igual que ahora (backoff, visibilitychange). Al reconectar, `hello` reemplaza el estado.
+- Idioma (`public/js/i18n.js`): la UI está en español e inglés. Las cadenas del código fuente están en
+  español y son la clave (`t('Nuevo chat')`); el diccionario EN vive al final de `i18n.js`. Se detecta de
+  `navigator.language`, se guarda en `localStorage['agyrc.lang']` y el botón del pie del drawer alterna
+  y recarga la página. Los mensajes `system` del servidor llevan `key` + `params` (`sys.init`,
+  `sys.stopped`, `sys.exit`…) y el cliente los traduce con `systemText()`; `text` sigue siendo el
+  español para compatibilidad. Los comandos de agy llevan `desc` (es) y `descEn`. El manifest se sirve
+  como `/manifest.json` (en) o `/manifest.es.json` (es) cambiando el `<link rel="manifest">`.
 
 ### 2.5 Proceso agy en tmux (`server/chat/tmux-proc.js`, `scripts/chat-agy.sh`)
 El servidor no lanza agy con `child_process` sino en una sesión tmux `chat-<id>` del socket
