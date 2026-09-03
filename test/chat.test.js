@@ -24,7 +24,12 @@ let composePrompt;
 let resolveAttachments;
 let sanitizeUploadName;
 
+// El servidor real mantiene vivo el event loop con el socket HTTP; aquí los reintentos del runner
+// (attachThinking) usan timers unref'd, así que sin esto Node ≤22 vacía el loop con promesas aún
+// pendientes y node:test cancela las pruebas.
+let keepAlive;
 before(async () => {
+  keepAlive = setInterval(() => {}, 1000);
   dataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'agy-rc-chat-test-'));
   projectsRoot = path.join(dataDir, 'projects');
   homeDir = path.join(dataDir, 'home');
@@ -50,6 +55,7 @@ before(async () => {
 });
 
 after(async () => {
+  clearInterval(keepAlive);
   if (realHome !== undefined) process.env.HOME = realHome;
   await fs.rm(dataDir, { recursive: true, force: true });
 });

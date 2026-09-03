@@ -83,7 +83,12 @@ function abandon(runner) {
   return proc;
 }
 
+// El servidor real mantiene vivo el event loop con el socket HTTP; aquí los timers de sondeo de
+// TmuxProcess y los reintentos del runner son unref'd, así que sin esto Node ≤22 vacía el loop con
+// promesas aún pendientes y node:test cancela las pruebas.
+let keepAlive;
 before(async () => {
+  keepAlive = setInterval(() => {}, 1000);
   socket = `agyrc-chat-test-${process.pid}`;
   dataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'agy-rc-chat-tmux-'));
   process.env.AGY_TMUX_SOCKET = socket;
@@ -98,6 +103,7 @@ before(async () => {
 });
 
 after(async () => {
+  clearInterval(keepAlive);
   await execFileAsync('tmux', ['-L', socket, 'kill-server']).catch(() => {});
   await fs.rm(dataDir, { recursive: true, force: true });
 });

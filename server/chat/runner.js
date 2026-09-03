@@ -262,8 +262,15 @@ export class ChatRunner extends EventEmitter {
 
   /** Espera a que todo el trabajo async en curso termine (uso en tests). */
   async flush() {
-    while (this.pending.size > 0) {
-      await Promise.all([...this.pending]);
+    // attachThinking reintenta con timers unref'd: si fueran lo único pendiente, el event loop se
+    // vaciaría con esta promesa aún en vuelo (node:test lo reporta como test cancelado en Node ≤22).
+    const keepAlive = setInterval(() => {}, 1000);
+    try {
+      while (this.pending.size > 0) {
+        await Promise.all([...this.pending]);
+      }
+    } finally {
+      clearInterval(keepAlive);
     }
   }
 
